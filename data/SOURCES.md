@@ -32,8 +32,12 @@ value in the source.
 "VRAM" and "System RAM" tables, all platforms. Copied by hand. Valve publishes these as aggregate
 statistics; only the percentages are reproduced here, with attribution.
 
-## Font
+## Fonts
 
 JetBrains Mono Regular, SIL Open Font License 1.1, from
 [github.com/JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono). Licence text in
-`assets/fonts/OFL.txt`.
+`assets/fonts/OFL.txt`. Used in the receipt image and on the page.
+
+Instrument Serif Regular (page headlines only), SIL Open Font License 1.1, from
+[github.com/Instrument/instrument-serif](https://github.com/Instrument/instrument-serif). Licence
+text in `assets/fonts/OFL-InstrumentSerif.txt`.

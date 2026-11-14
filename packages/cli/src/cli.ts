@@ -90,7 +90,7 @@ async function main() {
     process.stderr.write(
       multi
         ? `${multi.displayName} came in more than one memory size. Pass it with the size, for example --gpu "${multi.displayName} 12GB"\n`
-        : `couldn't detect your GPU's VRAM${saw}, pass --gpu 'RTX 3060 12GB'\n`,
+        : `couldn't detect your GPU's VRAM${saw}, pass --gpu "RTX 3060 12GB"\n`,
     );
     process.exit(2);
   }

@@ -41,8 +41,11 @@ async function fromNvidiaSmi(): Promise<GpuInput[]> {
 /** 10/16/20 series notebook GPUs report desktop names, so ask the machine whether it is a laptop. */
 async function isLaptop(): Promise<boolean> {
   const si = await import("systeminformation");
-  const chassis = await withTimeout(si.chassis(), 6000);
-  if (chassis && /notebook|laptop|portable|convertible|detachable|tablet|sub notebook/i.test(chassis.type ?? "")) return true;
+  // Only the chassis type is read; the rest of what the OS returns is discarded.
+  const type = (await withTimeout(si.chassis(), 6000))?.type ?? "";
+  if (/notebook|laptop|portable|convertible|detachable|tablet|sub notebook/i.test(type)) return true;
+  // A desktop answer is final: a UPS can show up as a battery.
+  if (/desktop|tower|mini pc|all in one|server|rack|blade|space-saving|lunch box|stick pc/i.test(type)) return false;
   const battery = await withTimeout(si.battery(), 6000);
   return Boolean(battery?.hasBattery);
 }
@@ -57,7 +60,9 @@ async function fromSystemInformation(): Promise<GpuInput[]> {
       // On Windows the VRAM figure comes from WMI AdapterRAM, a 32-bit field that
       // caps at 4 GB, so it is not trusted. Elsewhere a positive value is used.
       const trusted = process.platform !== "win32" && typeof c.vram === "number" && c.vram >= 256 && !c.vramDynamic;
-      return { name: `${c.vendor ?? ""} ${c.model}`.trim(), vramMb: trusted ? c.vram! : null, source: "systeminformation" };
+      const vendor = (c.vendor ?? "").replace(/\s*(Corporation|Inc\.?|\(R\))/gi, "").trim();
+      const name = vendor && !c.model.toLowerCase().includes(vendor.toLowerCase()) ? `${vendor} ${c.model}` : c.model;
+      return { name, vramMb: trusted ? c.vram! : null, source: "systeminformation" };
     });
 }
 
@@ -76,7 +81,8 @@ export async function detect(): Promise<Detection> {
     return { gpus: [{ name: chip, vramMb: null, source: "systeminformation", unified: true }], ramGb };
   }
 
-  let gpus = await fromNvidiaSmi();
+  // VRAM_RECEIPT_SKIP_SMI=1 skips nvidia-smi, to test the fallback path on an Nvidia machine.
+  let gpus = process.env.VRAM_RECEIPT_SKIP_SMI ? [] : await fromNvidiaSmi();
   if (gpus.length) {
     const ambiguous = gpus.some((g) => {
       if (/laptop|max-?q|mobile/i.test(g.name)) return false;

@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   SKUS, STEAM_VRAM, buildReceipt, genMedianMbPerDollar, matchGpu, median, nominalRamGb,
@@ -67,6 +68,16 @@ describe("matchGpu", () => {
   it("reads the size from the --gpu flag", () => {
     expect(matchGpu(flag("RTX 3060 12GB"), SKUS).sku?.skuId).toBe("rtx-3060-12gb");
     expect(matchGpu(flag("RTX 3080 10 GB"), SKUS).sku?.skuId).toBe("rtx-3080-10gb");
+  });
+  it("accepts a model typed without its prefix", () => {
+    expect(matchGpu(flag("3060 ti"), SKUS).sku?.skuId).toBe("rtx-3060-ti-8gb");
+    expect(matchGpu(flag("4090"), SKUS).sku?.skuId).toBe("rtx-4090-24gb");
+    expect(matchGpu(flag("1080 ti"), SKUS).sku?.skuId).toBe("gtx-1080-ti-11gb");
+    expect(matchGpu(flag("1030"), SKUS).sku?.skuId).toBe("gt-1030-2gb");
+    expect(matchGpu(flag("RX 7800 XT"), SKUS).kind).toBe("not-in-dataset");
+    expect(matchGpu(smi("AMD Radeon RX 5700 XT", 8192), SKUS).kind).toBe("not-in-dataset");
+    expect(matchGpu(flag("Intel Arc A770 16GB"), SKUS).kind).toBe("not-in-dataset");
+    expect(matchGpu(flag("card from 2019"), SKUS).kind).toBe("not-in-dataset");
   });
   it("asks which size when the model has several and none was given", () => {
     const m = matchGpu(flag("RTX 3060"), SKUS);
@@ -173,6 +184,21 @@ describe("buildReceipt", () => {
       const r = buildReceipt({ gpus, ramGb: 16, paidUsd: 450, date });
       for (const l of r.lines) expect(l.length, l).toBeLessThanOrEqual(WIDTH);
       expect(r.text).not.toMatch(/[–—]/);
+    }
+  });
+});
+
+describe("no network", () => {
+  // Our own code must never talk to the network. (The bundled systeminformation
+  // library ships helpers for a website check and the Docker socket; nothing here calls them.)
+  it("source files use no network API", () => {
+    const dirs = [new URL("./", import.meta.url), new URL("../../cli/src/", import.meta.url)];
+    const banned = /\bfetch\(|node:https?|node:net|node:dgram|node:tls|from "https?"|XMLHttpRequest|WebSocket|sendBeacon|inetChecksite|inetLatency|docker/;
+    for (const dir of dirs) {
+      for (const f of readdirSync(dir)) {
+        if (!f.endsWith(".ts") || f.endsWith(".test.ts")) continue;
+        expect(banned.test(readFileSync(new URL(f, dir), "utf8")), f).toBe(false);
+      }
     }
   });
 });

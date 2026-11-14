@@ -1,7 +1,7 @@
 import type { GpuInput, MatchResult, Sku } from "./types";
 
 const LAPTOP = /\b(laptop|notebook|mobile|max-?q)\b|\bMX\s?\d{3}\b/i;
-const MODEL = /\b(GTX|RTX|GT)\s*(\d{4})(?:\s*(Ti))?(?:\s*(SUPER))?(?:\s+(D)\b)?/i;
+const MODEL = /(?:\b(GTX|RTX|GT)\s*)?\b(\d{4})(?:\s*(Ti))?(?:\s*(SUPER))?(?:\s+(D)\b)?/i;
 
 /** Strip vendor noise so "NVIDIA GeForce RTX 3060" and "rtx3060" look alike. */
 export function cleanName(name: string): string {
@@ -47,12 +47,16 @@ export function matchGpu(input: GpuInput, skus: Sku[]): MatchResult {
 
   const m = cleanName(input.name).match(MODEL);
   if (!m || input.unified) return none("not-in-dataset", null);
-  const [, prefix, numStr, ti, sup, dSuffix] = m;
+  const [, typedPrefix, numStr, ti, sup, dSuffix] = m;
   const generation = generationOf(Number(numStr));
+  // "3060 ti" typed without its prefix: only accepted for a GeForce model number.
+  if (!typedPrefix && (generation == null || /radeon|rx|arc|intel|amd/i.test(input.name))) return none("not-in-dataset", null);
+  const prefix = typedPrefix ?? (generation! >= 20 ? "RTX" : /^10[13]0$/.test(numStr!) ? "GT" : "GTX");
+  if (generation == null) return none("not-in-dataset", null);
   if (LAPTOP.test(input.name) || input.mobile) return none("laptop", generation);
   if (dSuffix) return none("not-in-dataset", generation);
 
-  const model = `${prefix!.toUpperCase()} ${numStr}${ti ? " Ti" : ""}${sup ? " SUPER" : ""}`;
+  const model = `${prefix.toUpperCase()} ${numStr}${ti ? " Ti" : ""}${sup ? " SUPER" : ""}`;
   const candidates = skus.filter((s) => s.model.toLowerCase() === model.toLowerCase());
   if (candidates.length === 0) return none("not-in-dataset", generation);
 
