@@ -72,7 +72,7 @@ button { font: inherit; color: inherit; cursor: pointer; border-radius: 0; }
 .solid:hover { background: var(--accent); border-color: var(--accent); }
 
 .hero { padding: 56px 0 44px; max-width: 860px; }
-.kicker { margin: 0 0 18px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.kicker { margin: 0 0 18px; font-size: 13px; letter-spacing: 0.02em; color: var(--ink-2); }
 h1 { font: 400 clamp(38px, 6.4vw, 76px)/1.02 var(--serif); margin: 0 0 22px; letter-spacing: -0.01em; text-wrap: balance; }
 .lede { max-width: 620px; margin: 0 0 26px; color: var(--ink-2); font-size: 16px; }
 .cmd { display: inline-flex; align-items: stretch; border: 1px solid var(--ink); background: var(--paper); max-width: 100%; }
