@@ -139,5 +139,12 @@ writeFileSync(
     `export const FONT_FAMILY = "JetBrains Mono";\nexport const FONT_TTF_BASE64 =\n  "${font.toString("base64")}";\n`,
 );
 
+// The page serves the CSV files as static downloads.
+const webData = p("web", "public", "data");
+mkdirSync(webData, { recursive: true });
+for (const f of ["gift-index.csv", "cpi.csv", "steam-vram-2026-10.csv", "steam-ram-2026-10.csv"]) {
+  writeFileSync(join(webData, f), readFileSync(p("data", f)));
+}
+
 const priced = skus.filter((s) => s.msrpUsd !== null).length;
 console.log(`gift-index: ${skus.length} SKUs (${priced} with MSRP, ${skus.length - priced} blank). CPI now ${cpiNowMonth} = ${cpiNow}.`);

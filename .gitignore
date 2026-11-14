@@ -6,3 +6,4 @@ dist/
 .wrangler/
 .DS_Store
 vram-receipt*.png
+web/public/data/

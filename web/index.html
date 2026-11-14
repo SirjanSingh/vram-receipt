@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VRAM Receipt: VRAM per launch dollar for every GeForce card</title>
+    <meta name="description" content="An open dataset of VRAM per launch dollar for every desktop GeForce card from the 10 series to the 50 series, CPI-adjusted. Pick your card and get a receipt." />
+    <meta property="og:title" content="VRAM Receipt" />
+    <meta property="og:description" content="VRAM per launch dollar for every desktop GeForce card, 10 series to 50 series. Launch MSRP, CPI-adjusted, open CSV." />
+    <meta property="og:type" content="website" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/JetBrainsMono-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#receipt">Skip to the receipt</a>
+
+    <header class="top">
+      <a class="brand" href="/" aria-label="VRAM Receipt, home">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M6 2h20v26l-3.3-2.4L19.3 28 16 25.6 12.7 28l-3.4-2.4L6 28z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" />
+          <path d="M11 9h10M11 14h10M11 19h5" stroke="var(--ink)" stroke-width="2" stroke-linecap="square" />
+          <rect x="18" y="17" width="4" height="4" fill="var(--accent)" />
+        </svg>
+        <span>VRAM Receipt</span>
+      </a>
+      <nav aria-label="Site">
+        <a href="#chart">Chart</a>
+        <a href="#receipt">Receipt</a>
+        <a href="/data/gift-index.csv">CSV</a>
+        <a href="https://github.com/SirjanSingh/vram-receipt">GitHub</a>
+        <button id="theme" type="button" class="ghost" aria-label="Switch colour theme">Theme</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="kicker">Open dataset · desktop GeForce, 10 series to 50 series</p>
+        <h1>How much VRAM did each GeForce generation give you per launch dollar?</h1>
+        <p class="lede">
+          Every card's launch MSRP, traced to the Nvidia page that announced it, then adjusted for
+          inflation. Get a receipt for your own GPU and RAM, then take the data.
+        </p>
+        <div class="cmd">
+          <code id="cmd-text">npx vram-receipt</code>
+          <button id="copy-cmd" type="button">Copy</button>
+        </div>
+        <p class="fine">
+          Runs on your machine and uploads nothing. Prices are launch MSRP, not street price.
+        </p>
+      </section>
+
+      <section id="chart" class="block">
+        <div class="block-head">
+          <h2>VRAM per launch dollar, by generation</h2>
+          <div class="seg" role="group" aria-label="Price basis">
+            <button type="button" data-basis="nominal" aria-pressed="true">Launch dollars</button>
+            <button type="button" data-basis="real" aria-pressed="false">Today's dollars</button>
+          </div>
+        </div>
+        <p class="note" id="chart-note"></p>
+        <figure class="chart-wrap">
+          <div id="chart-svg"></div>
+          <div id="tip" class="tip" role="status" hidden></div>
+          <figcaption>
+            Each dot is one card and memory size. The bar is the generation median. MB of VRAM per
+            US dollar of launch MSRP; today's dollars use US CPI to October 2026.
+            <span id="blank-count"></span>
+          </figcaption>
+        </figure>
+        <details class="table">
+          <summary>Show the numbers as a table</summary>
+          <div class="table-scroll"><table id="data-table"></table></div>
+        </details>
+      </section>
+
+      <section id="receipt" class="block two">
+        <div class="form">
+          <h2>Pick your card</h2>
+          <p class="note">
+            This runs in your browser. What you pick is not sent anywhere. For automatic detection,
+            use the command above.
+          </p>
+          <label for="card">Graphics card</label>
+          <select id="card"></select>
+          <label for="ram">System RAM</label>
+          <select id="ram"></select>
+          <label for="paid">What you paid, in USD <span class="opt">(optional)</span></label>
+          <input id="paid" type="number" min="1" max="100000" step="1" inputmode="numeric" placeholder="left blank by default" />
+          <button id="copy-receipt" type="button" class="solid">Copy receipt as text</button>
+          <p class="fine" id="copy-status" role="status"></p>
+        </div>
+        <div class="paper-wrap">
+          <pre id="receipt-out" class="paper" tabindex="0" aria-label="Your receipt"></pre>
+        </div>
+      </section>
+
+      <section class="block caveats">
+        <h2>Before you quote a number</h2>
+        <ul>
+          <li><strong>MSRP is not what people paid.</strong> Many of these cards never sold at list price. No price history exists that can be legally republished, so there is none here.</li>
+          <li><strong>Blank means unknown.</strong> A card with no confirmed primary-source price has no price, not a guess.</li>
+          <li><strong>Desktop cards only.</strong> Laptop GPUs have no list price. The command still shows their VRAM and where it sits on the Steam survey.</li>
+        </ul>
+        <p><a href="https://github.com/SirjanSingh/vram-receipt/blob/main/METHOD.md">Read the full method</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Unofficial fan project, not affiliated with or endorsed by NVIDIA or Jensen Huang. NVIDIA,
+        GeForce, GTX and RTX are trademarks of NVIDIA Corporation.
+      </p>
+      <p>
+        Data: <a href="/data/gift-index.csv">gift-index.csv</a>, CC BY-SA 4.0. Code: MIT.
+        <a href="https://github.com/SirjanSingh/vram-receipt/blob/main/PRIVACY.md">Privacy</a>
+        <a href="https://github.com/SirjanSingh/vram-receipt/blob/main/TERMS.md">Terms</a>
+        <a href="https://github.com/SirjanSingh/vram-receipt/blob/main/data/SOURCES.md">Sources</a>
+      </p>
+      <p>No cookies, analytics or trackers on this page.</p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
