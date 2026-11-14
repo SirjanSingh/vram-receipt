@@ -1,0 +1,11 @@
+The files in this directory are licensed under the Creative Commons
+Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+
+Full text: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+Attribution: "VRAM Receipt gift index, github.com/SirjanSingh/vram-receipt".
+
+gift-index.csv is derived in part from the English Wikipedia GeForce series
+articles (CC BY-SA 4.0). cpi.csv reproduces a public-domain US Bureau of Labor
+Statistics series. The Steam survey files reproduce aggregate percentages
+published by Valve. See SOURCES.md.

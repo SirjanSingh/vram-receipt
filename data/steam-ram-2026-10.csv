@@ -1,0 +1,17 @@
+# Steam Hardware & Software Survey, October 2026, "System RAM" table, all platforms.
+# Source: https://store.steampowered.com/hwsurvey/ retrieved 2026-11-14. Transcribed by hand; shares are percent of surveyed machines.
+# ram_gb is the bin's nominal size; empty for open-ended and "Other" rows.
+bin,ram_gb,share_pct
+Less than 4 GB,,0.02
+4 GB,4,1.35
+8 GB,8,7.52
+12 GB,12,2.45
+16 GB,16,41.42
+24 GB,24,2.31
+28 GB,28,0.53
+32 GB,32,37.06
+48 GB,48,1.19
+60 GB,60,0.99
+64 GB,64,3.94
+More than 64 GB,,0.60
+Other,,0.64

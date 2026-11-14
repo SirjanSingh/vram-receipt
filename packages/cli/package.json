@@ -1,0 +1,36 @@
+{
+  "name": "vram-receipt",
+  "version": "0.1.0",
+  "description": "A receipt for your GPU and RAM: VRAM per launch dollar for every GeForce card from the 10 series to the 50 series, CPI-adjusted. Runs locally.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "vram-receipt": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  },
+  "devDependencies": {
+    "@vram-receipt/core": "*",
+    "systeminformation": "^5.33.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "vram",
+    "gpu",
+    "ram",
+    "msrp",
+    "dataset",
+    "cli"
+  ]
+}

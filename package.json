@@ -1,0 +1,27 @@
+{
+  "name": "vram-receipt-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/core",
+    "packages/cli",
+    "web"
+  ],
+  "scripts": {
+    "data:build": "tsx scripts/build-data.ts",
+    "test": "vitest run",
+    "build": "npm run data:build && npm run build -w vram-receipt",
+    "dev:web": "npm run dev -w web",
+    "build:web": "npm run data:build && npm run build -w web"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

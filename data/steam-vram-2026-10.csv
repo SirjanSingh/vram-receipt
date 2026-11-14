@@ -1,0 +1,21 @@
+# Steam Hardware & Software Survey, October 2026, "VRAM" table, all platforms.
+# Source: https://store.steampowered.com/hwsurvey/ retrieved 2026-11-14. Transcribed by hand; shares are percent of surveyed machines.
+# vram_mb is empty for the "Other" row, which is dropped from the percentile denominator (see METHOD.md).
+bin,vram_mb,share_pct
+512 MB,512,2.81
+1 GB,1024,1.46
+2 GB,2048,3.78
+3 GB,3072,1.30
+4 GB,4096,5.54
+6 GB,6144,5.20
+8 GB,8192,26.92
+10 GB,10240,1.84
+11 GB,11264,0.94
+12 GB,12288,12.91
+16 GB,16384,26.35
+20 GB,20480,1.28
+22 GB,22528,0.97
+24 GB,24576,5.40
+32 GB,32768,1.40
+64 GB,65536,0.52
+Other,,1.38

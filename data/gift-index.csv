@@ -1,0 +1,60 @@
+# VRAM Receipt gift index: desktop GeForce 10 to 50 series, one row per (model, vram_gb).
+# License: CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). Model list, launch dates and memory specs are derived from the English Wikipedia GeForce series articles (CC BY-SA 4.0); see data/SOURCES.md.
+# msrp_usd is the launch list price in USD as stated in the page at msrp_source_url. It is MSRP, not street price. A blank msrp_usd means no primary source was confirmed; it does not mean free.
+# cpi_launch, cpi_now, msrp_real_usd, mb_per_dollar and mb_per_real_dollar are computed by scripts/build-data.ts. Do not edit them by hand.
+sku_id,model,generation,vram_gb,mem_type,launch_date,msrp_usd,fe_price_usd,msrp_source_url,cpi_launch,cpi_now,msrp_real_usd,mb_per_dollar,mb_per_real_dollar,notes
+gt-1010-2gb,GT 1010,10,2,GDDR5,2021-01-13,,,,,,,,,No primary-source MSRP confirmed
+gt-1030-2gb,GT 1030,10,2,GDDR5,2017-05-17,,,,,,,,,No primary-source MSRP confirmed; a DDR4 variant launched 2018-03-12
+gtx-1050-2gb,GTX 1050,10,2,GDDR5,2016-10-25,,,,,,,,,No primary-source MSRP confirmed
+gtx-1050-3gb,GTX 1050,10,3,GDDR5,2018-05-21,,,,,,,,,No primary-source MSRP confirmed
+gtx-1050-ti-4gb,GTX 1050 Ti,10,4,GDDR5,2016-10-25,,,,,,,,,No primary-source MSRP confirmed
+gtx-1060-3gb,GTX 1060,10,3,GDDR5,2016-08-18,,,,,,,,,No primary-source MSRP confirmed
+gtx-1060-6gb,GTX 1060,10,6,GDDR5,2016-07-19,249,299,https://nvidianews.nvidia.com/news/a-quantum-leap-for-every-gamer:-nvidia-unveils-the-geforce-gtx-1060,240.101,337.476,349.98,24.67,17.56,MSRP is the partner-card starting price; Founders Edition listed separately. A GDDR5X revision launched 2018-10-18
+gtx-1070-8gb,GTX 1070,10,8,GDDR5,2016-06-10,379,449,https://nvidianews.nvidia.com/news/a-quantum-leap-in-gaming-nvidia-introduces-geforce-gtx-1080,240.222,337.476,532.44,21.61,15.39,MSRP is the partner-card expected starting price; Founders Edition listed separately
+gtx-1070-ti-8gb,GTX 1070 Ti,10,8,GDDR5,2017-11-02,449,,https://www.nvidia.com/en-us/geforce/news/nvidia-geforce-gtx-1070-ti/,247.284,337.476,612.76,18.24,13.37,
+gtx-1080-8gb,GTX 1080,10,8,GDDR5X,2016-05-27,599,699,https://nvidianews.nvidia.com/news/a-quantum-leap-in-gaming-nvidia-introduces-geforce-gtx-1080,239.557,337.476,843.84,13.68,9.71,MSRP is the partner-card expected starting price; Founders Edition listed separately
+gtx-1080-ti-11gb,GTX 1080 Ti,10,11,GDDR5X,2017-03-10,699,699,https://nvidianews.nvidia.com/news/nvidia-introduces-the-beastly-geforce-gtx-1080-ti-fastest-gaming-gpu-ever,243.892,337.476,967.21,16.11,11.65,
+gtx-1630-4gb,GTX 1630,16,4,GDDR6,2022-06-28,,,,,,,,,No primary-source MSRP confirmed
+gtx-1650-4gb,GTX 1650,16,4,GDDR5,2019-04-23,149,,https://nvidianews.nvidia.com/news/nvidia-supercharges-record-80-gaming-laptop-models-with-turing-powered-gtx-16-series-gpus,255.233,337.476,197.01,27.49,20.79,GDDR6 revisions launched in 2020
+gtx-1650-super-4gb,GTX 1650 SUPER,16,4,GDDR6,2019-11-22,159,,https://www.nvidia.com/en-us/geforce/news/nvidia-geforce-gtx-1660-super-1650-super/,257.879,337.476,208.08,25.76,19.69,
+gtx-1660-6gb,GTX 1660,16,6,GDDR5,2019-03-14,219,,https://www.nvidia.com/en-us/geforce/news/nvidia-geforce-gtx-1660/,254.277,337.476,290.66,28.05,21.14,
+gtx-1660-super-6gb,GTX 1660 SUPER,16,6,GDDR6,2019-10-29,229,,https://nvidianews.nvidia.com/news/a-hero-for-every-gamer-nvidia-introduces-new-geforce-gtx-super-series,257.155,337.476,300.53,26.83,20.44,
+gtx-1660-ti-6gb,GTX 1660 Ti,16,6,GDDR6,2019-02-22,279,,https://nvidianews.nvidia.com/news/new-geforce-gtx-1660-ti-delivers-great-performance-leap-for-every-gamer-starting-at-279,253.319,337.476,371.69,22.02,16.53,
+rtx-2060-6gb,RTX 2060,20,6,GDDR6,2019-01-15,349,,https://nvidianews.nvidia.com/news/nvidia-geforce-rtx-2060-is-here-next-gen-gaming-takes-off,252.561,337.476,466.34,17.60,13.17,
+rtx-2060-12gb,RTX 2060,20,12,GDDR6,2021-12-07,,,,,,,,,No primary-source MSRP confirmed
+rtx-2060-super-8gb,RTX 2060 SUPER,20,8,GDDR6,2019-07-09,399,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-20-series-super-gpus/,255.802,337.476,526.40,20.53,15.56,
+rtx-2070-8gb,RTX 2070,20,8,GDDR6,2018-10-17,499,599,https://nvidianews.nvidia.com/news/10-years-in-the-making-nvidia-brings-real-time-ray-tracing-to-gamers-with-geforce-rtx,252.772,337.476,666.22,16.42,12.30,MSRP is the starting price; Founders Edition listed separately
+rtx-2070-super-8gb,RTX 2070 SUPER,20,8,GDDR6,2019-07-09,499,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-20-series-super-gpus/,255.802,337.476,658.32,16.42,12.44,
+rtx-2080-8gb,RTX 2080,20,8,GDDR6,2018-09-20,699,799,https://nvidianews.nvidia.com/news/10-years-in-the-making-nvidia-brings-real-time-ray-tracing-to-gamers-with-geforce-rtx,252.182,337.476,935.42,11.72,8.76,MSRP is the starting price; Founders Edition listed separately
+rtx-2080-super-8gb,RTX 2080 SUPER,20,8,GDDR6,2019-07-23,699,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-20-series-super-gpus/,255.802,337.476,922.18,11.72,8.88,
+rtx-2080-ti-11gb,RTX 2080 Ti,20,11,GDDR6,2018-09-27,999,1199,https://nvidianews.nvidia.com/news/10-years-in-the-making-nvidia-brings-real-time-ray-tracing-to-gamers-with-geforce-rtx,252.182,337.476,1336.89,11.28,8.43,MSRP is the starting price; Founders Edition listed separately
+rtx-3050-6gb,RTX 3050,30,6,GDDR6,2024-02-02,,,,,,,,,No primary-source MSRP confirmed
+rtx-3050-8gb,RTX 3050,30,8,GDDR6,2022-01-27,249,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-3050-graphics-cards/,282.543,337.476,297.41,32.90,27.54,
+rtx-3060-8gb,RTX 3060,30,8,GDDR6,2022-10,,,,,,,,,No primary-source MSRP confirmed; launch month only
+rtx-3060-12gb,RTX 3060,30,12,GDDR6,2021-02-25,329,,https://nvidianews.nvidia.com/news/nvidia-introduces-geforce-rtx-3060-next-generation-of-the-worlds-most-popular-gpu,263.579,337.476,421.24,37.35,29.17,
+rtx-3060-ti-8gb,RTX 3060 Ti,30,8,GDDR6,2020-12-02,399,,https://nvidianews.nvidia.com/news/nvidia-debuts-geforce-rtx-3060-family-for-the-holidays,262.045,337.476,513.85,20.53,15.94,A GDDR6X revision launched in 2022-10
+rtx-3070-8gb,RTX 3070,30,8,GDDR6,2020-10-29,499,,https://nvidianews.nvidia.com/news/nvidia-delivers-greatest-ever-generational-leap-in-performance-with-geforce-rtx-30-series-gpus,260.319,337.476,646.90,16.42,12.66,
+rtx-3070-ti-8gb,RTX 3070 Ti,30,8,GDDR6X,2021-06-10,599,,https://nvidianews.nvidia.com/news/its-time-for-ti-nvidia-introduces-gaming-flagship-the-geforce-rtx-3080-ti,270.654,337.476,746.89,13.68,10.97,
+rtx-3080-10gb,RTX 3080,30,10,GDDR6X,2020-09-17,699,,https://nvidianews.nvidia.com/news/nvidia-delivers-greatest-ever-generational-leap-in-performance-with-geforce-rtx-30-series-gpus,259.997,337.476,907.30,14.65,11.29,
+rtx-3080-12gb,RTX 3080,30,12,GDDR6X,2022-01-11,,,,,,,,,No primary-source MSRP confirmed
+rtx-3080-ti-12gb,RTX 3080 Ti,30,12,GDDR6X,2021-06-03,1199,,https://nvidianews.nvidia.com/news/its-time-for-ti-nvidia-introduces-gaming-flagship-the-geforce-rtx-3080-ti,270.654,337.476,1495.02,10.25,8.22,
+rtx-3090-24gb,RTX 3090,30,24,GDDR6X,2020-09-24,1499,,https://nvidianews.nvidia.com/news/nvidia-delivers-greatest-ever-generational-leap-in-performance-with-geforce-rtx-30-series-gpus,259.997,337.476,1945.70,16.39,12.63,
+rtx-3090-ti-24gb,RTX 3090 Ti,30,24,GDDR6X,2022-03-29,1999,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-3090-ti-out-now/,287.674,337.476,2345.07,12.29,10.48,
+rtx-4060-8gb,RTX 4060,40,8,GDDR6,2023-06-29,299,,https://nvidianews.nvidia.com/news/geforce-rtx-4060-family-is-here-nvidias-revolutionary-ada-lovelace-architecture-comes-to-core-gamers-everywhere-starting-at-299,304.014,337.476,331.91,27.40,24.68,
+rtx-4060-ti-8gb,RTX 4060 Ti,40,8,GDDR6,2023-05-24,399,,https://nvidianews.nvidia.com/news/geforce-rtx-4060-family-is-here-nvidias-revolutionary-ada-lovelace-architecture-comes-to-core-gamers-everywhere-starting-at-299,303.334,337.476,443.91,20.53,18.45,
+rtx-4060-ti-16gb,RTX 4060 Ti,40,16,GDDR6,2023-07-18,499,,https://nvidianews.nvidia.com/news/geforce-rtx-4060-family-is-here-nvidias-revolutionary-ada-lovelace-architecture-comes-to-core-gamers-everywhere-starting-at-299,304.609,337.476,552.84,32.83,29.64,
+rtx-4070-12gb,RTX 4070,40,12,GDDR6X,2023-04-13,599,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-4070/,302.845,337.476,667.50,20.51,18.41,A GDDR6 revision launched in 2024-08
+rtx-4070-super-12gb,RTX 4070 SUPER,40,12,GDDR6X,2024-01-17,599,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-4080-4070-ti-4070-super-gpu/,309.698,337.476,652.73,20.51,18.83,
+rtx-4070-ti-12gb,RTX 4070 Ti,40,12,GDDR6X,2023-01-05,799,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-4070-ti/,300.420,337.476,897.55,15.38,13.69,
+rtx-4070-ti-super-16gb,RTX 4070 Ti SUPER,40,16,GDDR6X,2024-01-24,799,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-4080-4070-ti-4070-super-gpu/,309.698,337.476,870.67,20.51,18.82,
+rtx-4080-16gb,RTX 4080,40,16,GDDR6X,2022-11-16,1199,,https://nvidianews.nvidia.com/news/nvidia-delivers-quantum-leap-in-performance-introduces-new-era-of-neural-rendering-with-geforce-rtx-40-series,298.786,337.476,1354.26,13.66,12.10,The 12 GB RTX 4080 announced at 899 USD was never launched and is not listed
+rtx-4080-super-16gb,RTX 4080 SUPER,40,16,GDDR6X,2024-01-31,999,,https://www.nvidia.com/en-us/geforce/news/geforce-rtx-4080-4070-ti-4070-super-gpu/,309.698,337.476,1088.60,16.40,15.05,
+rtx-4090-24gb,RTX 4090,40,24,GDDR6X,2022-10-12,1599,,https://nvidianews.nvidia.com/news/nvidia-delivers-quantum-leap-in-performance-introduces-new-era-of-neural-rendering-with-geforce-rtx-40-series,298.007,337.476,1810.78,15.37,13.57,
+rtx-5050-8gb,RTX 5050,50,8,GDDR6,2025-07-01,249,,https://www.nvidia.com/en-us/geforce/news/rtx-5050-desktop-gpu-and-laptops/,322.169,337.476,260.83,32.90,31.41,
+rtx-5060-8gb,RTX 5060,50,8,GDDR7,2025-05-19,299,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-arrives-for-every-gamer-starting-at-299,320.620,337.476,314.72,27.40,26.03,
+rtx-5060-ti-8gb,RTX 5060 Ti,50,8,GDDR7,2025-04-16,379,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-arrives-for-every-gamer-starting-at-299,320.302,337.476,399.32,21.61,20.51,
+rtx-5060-ti-16gb,RTX 5060 Ti,50,16,GDDR7,2025-04-16,429,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-arrives-for-every-gamer-starting-at-299,320.302,337.476,452.00,38.19,36.25,
+rtx-5070-12gb,RTX 5070,50,12,GDDR7,2025-03-05,549,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-50-series-opens-new-world-of-ai-computer-graphics,319.785,337.476,579.37,22.38,21.21,
+rtx-5070-ti-16gb,RTX 5070 Ti,50,16,GDDR7,2025-02-20,749,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-50-series-opens-new-world-of-ai-computer-graphics,319.679,337.476,790.70,21.87,20.72,
+rtx-5080-16gb,RTX 5080,50,16,GDDR7,2025-01-30,999,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-50-series-opens-new-world-of-ai-computer-graphics,318.961,337.476,1056.99,16.40,15.50,
+rtx-5090-32gb,RTX 5090,50,32,GDDR7,2025-01-30,1999,,https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-50-series-opens-new-world-of-ai-computer-graphics,318.961,337.476,2115.04,16.39,15.49,
