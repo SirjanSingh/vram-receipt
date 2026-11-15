@@ -38,7 +38,7 @@ export function generationOf(modelNumber: number): number | null {
  * - no fuzzy fallback. No match means no price, never a guess.
  */
 export function matchGpu(input: GpuInput, skus: Sku[]): MatchResult {
-  const displayName = cleanName(input.name).replace(/\s*\d{1,3}\s*GB\b/i, "").trim() || input.name.trim();
+  const displayName = cleanName(input.name).replace(/[\s_-]*\d{1,3}\s*GB\b/i, "").trim() || input.name.trim();
   const hint = vramHintGb(input.name);
   const vramGb = input.unified ? null : input.vramMb != null ? snapMbToGb(input.vramMb) : hint;
   const none = (kind: MatchResult["kind"], generation: number | null, v: number | null = vramGb): MatchResult => ({

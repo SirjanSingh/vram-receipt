@@ -2,6 +2,8 @@ import { SKUS, STEAM_VRAM, STEAM_SURVEY_LABEL } from "./generated/data";
 import { matchGpu, sizesFor } from "./match";
 import { genMedianMbPerDollar, steamPlacement } from "./metrics";
 import { VERDICTS } from "./verdicts";
+import { tierFor } from "./tiers";
+import type { Tier } from "./tiers";
 import type { GpuInput, MatchResult } from "./types";
 
 export const WIDTH = 60;
@@ -24,7 +26,16 @@ export interface Receipt {
   matches: MatchResult[];
   /** True when at least one GPU got the full price block. */
   priced: boolean;
+  /** The card with the most known VRAM, or null when no size is known. */
+  best: MatchResult | null;
+  /** How many cards are identical to the best one (8 on a DGX). */
+  bestCount: number;
+  /** Tier of the best card times bestCount, or null when no VRAM size is known. */
+  tier: Tier | null;
 }
+
+/** Header right side. The page swaps this string for its own wording. */
+export const RECEIPT_TAG = "(local run)";
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 const fixed1 = (n: number) => n.toFixed(1);
@@ -53,11 +64,11 @@ function wrap(text: string, indent: string): string[] {
 
 const IND = "       ";
 
-function gpuBlock(gpu: GpuInput, m: MatchResult, paidUsd: number | null | undefined, first: boolean): string[] {
+function gpuBlock(gpu: GpuInput, m: MatchResult, paidUsd: number | null | undefined, first: boolean, count = 1): string[] {
   const out: string[] = [];
-  const size = gpu.unified ? "unified memory" : m.vramGb != null ? `${m.vramGb} GB` : "VRAM unknown";
+  const size = gpu.unified ? "unified memory" : m.vramGb != null ? `${m.vramGb} GB${count > 1 ? " each" : ""}` : "VRAM unknown";
   const gen = m.generation != null ? `GEN: ${m.generation}-series` : "";
-  out.push(...row(`GPU    ${m.displayName} (${size})`, gen));
+  out.push(...row(`GPU    ${count > 1 ? `${count}x ` : ""}${m.displayName} (${size})`, gen));
 
   if (m.kind === "desktop-sku" && m.sku && m.sku.msrpUsd != null && m.sku.mbPerDollar != null) {
     const s = m.sku;
@@ -93,16 +104,39 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   const machine = sources.map((s) => (s === "nvidia-smi" || s === "systeminformation" ? `detected via ${s}` : s)).join(" + ");
 
   const lines: string[] = [];
-  lines.push(...row("VRAM RECEIPT", "(local run, not uploaded)"));
+  lines.push(...row("VRAM RECEIPT", RECEIPT_TAG));
   lines.push(...row(`DATE ${input.date}`, `MACHINE: ${machine}`));
   lines.push(RULE);
-  input.gpus.forEach((g, i) => lines.push(...gpuBlock(g, matches[i]!, input.paidUsd, i === 0)));
+  // Identical cards (a multi-GPU server) print once with a count instead of N copies.
+  const groups: { gpu: GpuInput; m: MatchResult; count: number }[] = [];
+  input.gpus.forEach((g, i) => {
+    const m = matches[i]!;
+    const prev = groups[groups.length - 1];
+    if (prev && prev.m.displayName === m.displayName && prev.m.vramGb === m.vramGb && prev.m.kind === m.kind && !!prev.gpu.unified === !!g.unified) prev.count++;
+    else groups.push({ gpu: g, m, count: 1 });
+  });
+  groups.forEach((g, i) => lines.push(...gpuBlock(g.gpu, g.m, input.paidUsd, i === 0, g.count)));
+  const dedicated = matches.filter((m, i) => !input.gpus[i]!.unified && m.vramGb != null);
+  if (dedicated.length > 1) {
+    const total = dedicated.reduce((s, m) => s + m.vramGb!, 0);
+    lines.push(...row("TOTAL VRAM", `${total} GB across ${dedicated.length} GPUs`));
+  }
   lines.push(RULE);
   lines.push(input.ramGb != null ? `SYSTEM RAM   ${input.ramGb} GB` : "SYSTEM RAM   not detected (pass --ram 32)");
   lines.push(RULE);
 
-  // Steam placement uses the card with the most VRAM.
-  const best = matches.filter((m) => m.vramGb != null).sort((a, b) => b.vramGb! - a.vramGb!)[0];
+  // The tier uses the card with the most VRAM, times how many identical copies of it the
+  // rig has; the Steam placement stays per card, since the survey counts single cards.
+  const best = matches.filter((m) => m.vramGb != null).sort((a, b) => b.vramGb! - a.vramGb!)[0] ?? null;
+  const bestCount = best ? matches.filter((m) => m.displayName === best.displayName && m.vramGb === best.vramGb).length : 0;
+  const tier = best ? tierFor(best.vramGb! * bestCount) : null;
+  if (tier) {
+    lines.push(`TIER   ${tier.name.toUpperCase()}`);
+    lines.push(...wrap(tier.line, IND));
+  } else {
+    lines.push("TIER   none (no dedicated VRAM size to rank)");
+  }
+  lines.push(RULE);
   const placement = best ? steamPlacement(best.vramGb!, STEAM_VRAM) : null;
   if (placement) {
     lines.push(`STEAM  your VRAM bin: ${placement.bin.bin}`);
@@ -119,5 +153,5 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   lines.push("NVIDIA or Jensen Huang");
 
   const priced = matches.some((m) => m.kind === "desktop-sku" && m.sku?.msrpUsd != null);
-  return { lines, text: lines.join("\n"), matches, priced };
+  return { lines, text: lines.join("\n"), matches, priced, best, bestCount, tier };
 }
