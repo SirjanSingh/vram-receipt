@@ -1,0 +1,32 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(0.3, 1.35, 0.55, 1)",
+        "createdAt": "2026-11-14T22:25:55.061Z",
+        "reason": "Claude: literal motion, VRAM chips physically dropping into a jar and settling"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "web/index.html"
+        ],
+        "createdAt": "2026-11-14T23:00:25.128Z",
+        "reason": "Claude: detector cannot resolve clamp(); h1 renders at 82-120px and h2 at 30-42px in Chrome screenshots"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "web/index.html"
+        ],
+        "createdAt": "2026-11-14T23:00:25.428Z",
+        "reason": "Claude: body overflow-x hidden only stops sideways scroll from the cluster glow; hover tooltip is clamped inside the canvas box"
+      }
+    ]
+  }
+}
