@@ -239,8 +239,8 @@ function linkFor() {
 function shareText() {
   const t = tierFor(you.vramGb);
   return you.joined
-    ? `Thanks, Jensen. My ${you.sku.model} put ${you.vramGb} GB into the people's VRAM cluster. Rank #${you.joined.rank}. Tier: ${t.name}.`
-    : `Thanks, Jensen. My ${you.sku.model} has ${you.vramGb} GB of VRAM. Tier: ${t.name}. npx vram-receipt`;
+    ? `Thank you, Jensen. My ${you.sku.model} put ${you.vramGb} GB into the farewell cluster. Rank #${you.joined.rank}. Tier: ${t.name}.`
+    : `Thank you, Jensen. My ${you.sku.model} has ${you.vramGb} GB of VRAM. Tier: ${t.name}. npx vram-receipt`;
 }
 
 async function renderCard() {
