@@ -66,11 +66,15 @@ your entry's public id. The install id is never returned.
 ### Where it is stored
 
 In a Postgres database hosted by Supabase. The table cannot be read or written directly from the
-outside; the public key can only call three functions (add or update your entry, read the totals,
-read one entry by its share id).
+outside. Reads go through three functions (read the totals, read one entry by its share id, remove
+your own entry). Adding or updating an entry goes through one server function that limits how many
+joins can come from one network.
 
-The app does not store IP addresses. Supabase's infrastructure may log requests, including IP
-addresses, under Supabase's own privacy policy, and I do not use those logs.
+To enforce that limit, the server keeps a one-way hash of your IP address (salted with a secret, so
+it cannot be turned back into the address), the install id, and the time of the join. These records
+are deleted after 24 hours and are never public. Your IP address itself is not stored. Supabase's
+infrastructure may log requests, including IP addresses, under Supabase's own privacy policy, and I
+do not use those logs.
 
 ### Updating and deleting
 
@@ -88,7 +92,12 @@ loads the public cluster totals from the same Supabase database when you open it
 from the page is opt-in, sends the fields listed above (with `web` as the source), and uses a random
 id kept in your browser (localStorage). If you choose "Laptop or other GPU", the card name you
 type is sent as the GPU model (letters, digits and basic punctuation only), so don't type anything
-personal there. "Remove my rig from the cluster" on the page deletes your entry using that id. There are no cookies, analytics, trackers or advertising scripts. The host
+personal there. "Remove my rig from the cluster" on the page deletes your entry using that id.
+
+When you open the join step, the page loads Cloudflare Turnstile, a check that you are not a bot.
+It runs only then, not on page load, and Cloudflare processes it under its own
+[Turnstile privacy addendum](https://www.cloudflare.com/turnstile-privacy-policy/). Apart from that
+there are no cookies, analytics, trackers or advertising scripts. The host
 (Cloudflare Pages) keeps standard server logs, which I do not have access to in identifiable form.
 
 ## If this changes
