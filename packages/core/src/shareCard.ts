@@ -130,7 +130,7 @@ export function shareCardSvg(c: ShareCardInput): string {
   const style = faces.length ? `<style>${faces.join("")}</style>` : "";
 
   const joined = c.rank != null && c.total != null;
-  const kicker = joined ? "ADDED TO THE GLOBAL VRAM CLUSTER" : "MY VRAM, BY THE GIGABYTE";
+  const kicker = joined ? "ADDED TO THE FAREWELL CLUSTER" : "MY VRAM, FOR JENSEN";
 
   // Big number, sized so "NN GB" fits the column even in the mono fallback.
   const n = fmtGb(c.vramGb);

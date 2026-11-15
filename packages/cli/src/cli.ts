@@ -22,9 +22,9 @@ Options
   --png <path>     where to write the receipt image (default ./vram-receipt.png);
                    the share card thanks-jensen.png goes in the same folder
   --no-png         text only, no images
-  --join           add your rig to the global cluster without asking
-  --no-join        never ask about the global cluster
-  --leave          remove this machine's entry from the global cluster
+  --join           add your rig to the farewell cluster without asking
+  --no-join        never ask about the farewell cluster
+  --leave          remove this machine's entry from the farewell cluster
   --json           print the result as JSON instead of the receipt
   -h, --help       this text
   -v, --version    version
@@ -72,7 +72,7 @@ async function main() {
       process.stderr.write(`Could not remove the entry: ${r.reason}\n`);
       process.exit(1);
     }
-    return out(r.value.removed > 0 ? "Removed this machine's rig from the global cluster.\n" : "No entry for this machine was in the cluster.\n");
+    return out(r.value.removed > 0 ? "Removed this machine's rig from the farewell cluster.\n" : "No entry for this machine was in the cluster.\n");
   }
 
   let gpus: GpuInput[] = args.gpus.map((name) => ({ name, vramMb: null, source: "--gpu flag" }));
@@ -132,23 +132,23 @@ async function main() {
   if (payload) {
     const preview = describePayload(payload).map((l) => `  ${l}`).join("\n");
     if (decision === "closed") {
-      out("The global cluster opens soon.\n\n");
+      out("The farewell cluster opens soon.\n\n");
     } else if (decision === "hint") {
-      out("To add your rig to the global cluster, run again with --join.\n\n");
+      out("To add your rig to the farewell cluster, run again with --join.\n\n");
     } else if (decision === "ask") {
-      out(`Join the global VRAM cluster? This is what would be sent:\n${preview}\n`);
-      const yes = await askYesNo("Add your rig to the global cluster? [y/N] ", process.stdin, process.stdout);
+      out(`Say goodbye with your GPU. This is what would be sent:\n${preview}\n`);
+      const yes = await askYesNo("Add your rig to the farewell cluster? [y/N] ", process.stdin, process.stdout);
       out("\n");
       if (yes) joined = await send(payload, cid.saved);
       else out("Not sent. Nothing left this machine.\n\n");
     } else if (decision === "send") {
-      out(`Sending to the global cluster (--join):\n${preview}\n\n`);
+      out(`Sending to the farewell cluster (--join):\n${preview}\n\n`);
       joined = await send(payload, cid.saved);
     }
   }
   if (joined?.ok) {
     const r = joined.value;
-    out(`You're in the cluster.\n`);
+    out(`You're in the farewell cluster. Thank you, Jensen.\n`);
     if (receipt.tier) out(`  tier     ${receipt.tier.name}\n`);
     out(`  rank     #${fmt(r.rank)} of ${fmt(r.total)}\n`);
     out(`  more VRAM than ${r.more_than_pct}% of the cluster\n`);

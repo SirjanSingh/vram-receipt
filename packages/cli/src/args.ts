@@ -7,7 +7,7 @@ export interface Args {
   png: string | null;
   noPng: boolean;
   json: boolean;
-  /** Send to the global cluster without asking. */
+  /** Send to the farewell cluster without asking. */
   join: boolean;
   /** Never ask, never send. */
   noJoin: boolean;

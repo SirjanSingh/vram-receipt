@@ -148,6 +148,9 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   const gen = matches.find((m) => m.generation != null && m.kind !== "not-in-dataset")?.generation;
   if (gen != null && VERDICTS[gen]) lines.push(...wrap(`VERDICT  ${VERDICTS[gen]}`, ""));
   lines.push(RULE);
+  // A receipt ends with a thank-you. This one is a goodbye: he stepped down on Nov 12, 2026.
+  lines.push(...row("THANK YOU, JENSEN.", "1993 to 2026"));
+  lines.push(RULE);
   lines.push(`Data: ${DATA_URL} (CC BY-SA 4.0)`);
   lines.push("unofficial fan project, not affiliated with or endorsed by");
   lines.push("NVIDIA or Jensen Huang");
