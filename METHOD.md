@@ -75,8 +75,66 @@ is not the whole PC market.
 
 Jokes. Not data.
 
+## Tiers
+
+The tier is picked from the nominal VRAM of the card with the most VRAM, times the number of
+identical copies of that card in the machine (an 8x V100 32 GB server counts 256 GB; a 3060 next to a
+1050 counts 12 GB). The Steam placement stays per card, because the survey counts single cards. Each
+tier starts at a size and runs up to the next one:
+
+| From | Tier |
+| --- | --- |
+| 0 GB | Spare Change |
+| 4 GB | Tip Jar |
+| 8 GB | Keynote Ticket |
+| 12 GB | Front Row |
+| 16 GB | Backstage Pass |
+| 24 GB | Leather Jacket |
+| 32 GB | The Kitchen |
+
+The cut points are round sizes that cards actually ship with, not percentiles. The tier lines are
+jokes and contain no statistics. A machine with no known VRAM size (Apple Silicon, or a card the
+tool could not size) gets no tier. Source: `packages/core/src/tiers.ts`.
+
+## Cluster rank
+
+Only for people who chose to add their rig to the global cluster. A rig's total VRAM is its per-card
+VRAM times its GPU count (1 to 16). For a rig with `v` GB of total VRAM in a cluster of `N` rigs:
+
+    rank          = 1 + (number of rigs with total VRAM > v)
+    more_than_pct = 100 * (number of rigs with total VRAM < v) / N, rounded to 0.1
+
+The pooled VRAM on the page is the sum of every rig's total VRAM.
+
+Rigs with the same VRAM share a rank, and rigs with the same VRAM are not counted as below you, the
+same rule as the Steam placement. Each install counts once: running the command again updates your
+entry. The computation is the `_placement` function in `supabase/migrations/`.
+
+This is a self-reported, opt-in sample of people who ran a GPU receipt tool and chose to share it.
+It leans heavily towards enthusiasts with big cards and is not representative of PCs, gamers or
+Steam users. Read the rank as "among the people in this cluster", nothing wider.
+
 ## Reproduce
 
     npm install
     npm run data:build   # recomputes every derived column and fails on any inconsistency
     npm test
+
+## The $500 jar
+
+The page shows six jars, one per generation. Each jar holds
+
+    gb_per_500 = median(mb_per_real_dollar over the generation's priced rows) * 500 / 1024
+
+so it is $500 in October 2026 dollars spent at that generation's median VRAM per CPI-adjusted launch
+dollar. It is a median of list prices across SKUs, not a card anyone could buy, and it is not
+weighted by sales. All six jars use the same 12 GB scale.
+
+## The revenue bar
+
+The revenue bar near the top of the page is Nvidia's most recent reported quarter, typed in by hand from
+Nvidia's earnings release (`web/src/revenue.ts`). From fiscal 2027 Nvidia reports two market
+platforms, Data Center and Edge Computing, and no longer reports gaming on its own. Edge Computing
+is Nvidia's bucket for PCs, game consoles, workstations, AI-RAN base stations, robotics and
+automotive. The bar shows one quarter as published; it is not a trend and does not estimate how much
+of Edge Computing is GeForce.

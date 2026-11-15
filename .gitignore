@@ -6,4 +6,7 @@ dist/
 .wrangler/
 .DS_Store
 vram-receipt*.png
+thanks-jensen*.png
 web/public/data/
+supabase/.temp/
+supabase/.branches/
