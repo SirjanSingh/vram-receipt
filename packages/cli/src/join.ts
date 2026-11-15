@@ -28,8 +28,9 @@ export function readClientId(dir = defaultIdDir()): string | null {
 /** Write the id so a later run updates the same entry. Returns false when the folder is not writable. */
 export function saveClientId(id: string, dir = defaultIdDir()): boolean {
   try {
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, "id"), `${id}\n`, "utf8");
+    mkdirSync(dir, { recursive: true, mode: 0o700 });
+    // Private to this user: the id is what lets someone update or delete the entry.
+    writeFileSync(join(dir, "id"), `${id}\n`, { encoding: "utf8", mode: 0o600 });
     return true;
   } catch {
     return false;
