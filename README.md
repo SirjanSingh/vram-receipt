@@ -1,6 +1,6 @@
 # vram-receipt
 
-*Dedication: thanks, Jensen.*
+*Dedication: thank you, Jensen. 1993 to 2026.*
 
 How much VRAM did each GeForce generation give you per launch dollar? This repo is an open dataset
 that answers it for every desktop GeForce card from the 10 series to the 50 series, CPI-adjusted,
@@ -31,6 +31,8 @@ STEAM  your VRAM bin: 12 GB
        more VRAM than 50.5% (method: METHOD.md)
 VERDICT  Survived the shortage. Kept the card.
 ------------------------------------------------------------
+THANK YOU, JENSEN.                              1993 to 2026
+------------------------------------------------------------
 Data: github.com/SirjanSingh/vram-receipt (CC BY-SA 4.0)
 unofficial fan project, not affiliated with or endorsed by
 NVIDIA or Jensen Huang
@@ -40,7 +42,7 @@ It also saves two images in the folder you ran it from: the receipt as `vram-rec
 1200x630 share card, `thanks-jensen.png`, with your VRAM, card and tier.
 
 Then, if you are in a terminal, it shows exactly what it would send and asks whether to add your
-rig to the global VRAM cluster. The default is no. Say yes and you get your rank in the cluster
+rig to the farewell VRAM cluster. The default is no. Say yes and you get your rank in the cluster
 and a share link, and the rank goes on the card too.
 
 ## The data
@@ -67,7 +69,7 @@ The full method, including the exact formulas, is in [METHOD.md](METHOD.md). Sou
 npx vram-receipt                         # detect this machine
 npx vram-receipt --gpu "RTX 3060 12GB"   # name the card yourself
 npx vram-receipt --ram 32 --paid 450     # set RAM, add what you paid
-npx vram-receipt --join                  # add your rig to the global cluster without asking
+npx vram-receipt --join                  # add your rig to the farewell cluster without asking
 npx vram-receipt --no-join               # never ask about the cluster
 npx vram-receipt --no-png                # text only, no images
 npx vram-receipt --json                  # machine-readable, never asks
@@ -99,7 +101,7 @@ The tier comes from the VRAM of your biggest card. The lines are jokes, not data
 | 24 GB | Leather Jacket |
 | 32 GB and up | The Kitchen |
 
-### The global cluster
+### The farewell cluster
 
 An opt-in, public tally of the rigs people chose to add. Your rank is 1 plus the number of rigs with
 more VRAM than yours. It is a self-selected sample, not a survey of PCs; see [METHOD.md](METHOD.md).

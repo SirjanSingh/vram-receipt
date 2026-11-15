@@ -1,7 +1,7 @@
 {
   "name": "vram-receipt",
   "version": "0.1.0",
-  "description": "A receipt for your GPU and RAM: VRAM per launch dollar for every GeForce card from the 10 series to the 50 series, CPI-adjusted. Runs locally.",
+  "description": "Thank you, Jensen. A receipt for your GPU (VRAM per launch dollar, every GeForce from the 10 to the 50 series) and an opt-in farewell cluster of everyone's VRAM. Runs locally.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -31,6 +31,9 @@
     "ram",
     "msrp",
     "dataset",
-    "cli"
+    "cli",
+    "nvidia",
+    "geforce",
+    "jensen"
   ]
 }
