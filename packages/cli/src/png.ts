@@ -1,14 +1,18 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import { join } from "node:path";
-import { receiptSvg } from "@vram-receipt/core";
+import { receiptSvg, shareCardSvg } from "@vram-receipt/core";
+import type { ShareCardInput } from "@vram-receipt/core";
 import { FONT_FAMILY, FONT_TTF_BASE64 } from "@vram-receipt/core/src/generated/font";
 
+export type PngResult = { ok: true } | { ok: false; reason: string };
+
 /**
- * Render the receipt to a PNG with resvg. Returns null (with a reason) instead
- * of throwing: the text receipt is the product, the image is a convenience.
+ * Render an SVG to a PNG with resvg. Returns a reason instead of throwing:
+ * the text receipt is the product, the images are a convenience.
+ * `build` gets the font family name the renderer knows about.
  */
-export async function renderPng(lines: string[], outPath: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+async function svgToPng(build: (fontFamily: string) => string, outPath: string): Promise<PngResult> {
   let Resvg: typeof import("@resvg/resvg-js").Resvg;
   try {
     ({ Resvg } = await import("@resvg/resvg-js"));
@@ -20,8 +24,7 @@ export async function renderPng(lines: string[], outPath: string): Promise<{ ok:
   try {
     const fontPath = join(dir, "font.ttf");
     writeFileSync(fontPath, Buffer.from(FONT_TTF_BASE64, "base64"));
-    const svg = receiptSvg(lines, { fontFamily: FONT_FAMILY });
-    const png = new Resvg(svg, {
+    const png = new Resvg(build(FONT_FAMILY), {
       font: { loadSystemFonts: false, fontFiles: [fontPath], defaultFontFamily: FONT_FAMILY },
     }).render().asPng();
     writeFileSync(outPath, png);
@@ -32,3 +35,9 @@ export async function renderPng(lines: string[], outPath: string): Promise<{ ok:
     rmSync(dir, { recursive: true, force: true });
   }
 }
+
+export const renderPng = (lines: string[], outPath: string) => svgToPng((fontFamily) => receiptSvg(lines, { fontFamily }), outPath);
+
+/** The "Thanks, Jensen" share card. Only the bundled mono font is available, so it is also the display font. */
+export const renderShareCard = (card: Omit<ShareCardInput, "fonts" | "fontFaceSrc">, outPath: string) =>
+  svgToPng((fontFamily) => shareCardSvg({ ...card, fonts: { mono: fontFamily } }), outPath);

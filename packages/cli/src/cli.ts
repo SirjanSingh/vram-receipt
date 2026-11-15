@@ -1,12 +1,14 @@
-import { resolve } from "node:path";
-import { buildReceipt } from "@vram-receipt/core";
-import type { GpuInput } from "@vram-receipt/core";
+import { dirname, resolve } from "node:path";
+import { buildReceipt, clusterConfigured, leaveCluster, describePayload, shareUrl, submitRig, rigLabel } from "@vram-receipt/core";
+import type { GpuInput, RigPayload, SubmitResult } from "@vram-receipt/core";
+import { ArgError, parseArgs } from "./args";
 import { detect } from "./detect";
-import { renderPng } from "./png";
+import { askYesNo, buildPayload, clientIdFor, readClientId, decideJoin, saveClientId } from "./join";
+import { renderPng, renderShareCard } from "./png";
 
 declare const __VERSION__: string;
 
-const HELP = `vram-receipt: a receipt for your GPU and RAM
+const HELP = `vram-receipt: a receipt for your GPU and RAM, with a tier and a "Thanks, Jensen" card
 
   npx vram-receipt                       detect this machine
   npx vram-receipt --gpu "RTX 3060 12GB" skip detection, name the card
@@ -17,59 +19,51 @@ Options
                    (repeat the flag for more than one card)
   --ram <gb>       system RAM in GB
   --paid <usd>     what you paid, printed as you typed it
-  --png <path>     where to write the image (default ./vram-receipt.png)
-  --no-png         text only
+  --png <path>     where to write the receipt image (default ./vram-receipt.png);
+                   the share card thanks-jensen.png goes in the same folder
+  --no-png         text only, no images
+  --join           add your rig to the global cluster without asking
+  --no-join        never ask about the global cluster
+  --leave          remove this machine's entry from the global cluster
   --json           print the result as JSON instead of the receipt
   -h, --help       this text
   -v, --version    version
 
-Runs locally. Nothing is uploaded and there are no network calls.
+Runs locally. Nothing is sent unless you say yes (or pass --join).
+What would be sent is printed before you are asked. Privacy: PRIVACY.md in the repo.
 Prices are launch MSRP, not street price. Method: METHOD.md in the repo.
 Unofficial fan project, not affiliated with or endorsed by NVIDIA or Jensen Huang.`;
 
-interface Args {
-  gpus: string[];
-  ram: number | null;
-  paid: number | null;
-  png: string | null;
-  noPng: boolean;
-  json: boolean;
-}
+const out = (s: string) => process.stdout.write(s);
+const fmt = (n: number) => n.toLocaleString("en-US");
 
-function fail(msg: string): never {
-  process.stderr.write(`${msg}\n`);
-  process.exit(1);
-}
+type Joined = { ok: true; value: SubmitResult } | { ok: false; reason: string } | null;
 
-function parseArgs(argv: string[]): Args {
-  const a: Args = { gpus: [], ram: null, paid: null, png: null, noPng: false, json: false };
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i]!;
-    const [flag, inline] = arg.startsWith("--") && arg.includes("=") ? [arg.slice(0, arg.indexOf("=")), arg.slice(arg.indexOf("=") + 1)] : [arg, undefined];
-    const value = () => inline ?? argv[++i] ?? fail(`${flag} needs a value. See --help.`);
-    const positive = (label: string) => {
-      const n = Number(String(value()).replace(/[$,]|gb$/gi, ""));
-      if (!Number.isFinite(n) || n <= 0) fail(`${label} must be a positive number.`);
-      return n;
-    };
-    switch (flag) {
-      case "-h": case "--help": process.stdout.write(`${HELP}\n`); process.exit(0);
-      case "-v": case "--version": process.stdout.write(`${__VERSION__}\n`); process.exit(0);
-      case "--gpu": a.gpus.push(String(value())); break;
-      case "--ram": a.ram = positive("--ram"); break;
-      case "--paid": a.paid = positive("--paid"); break;
-      case "--png": a.png = String(value()); break;
-      case "--no-png": a.noPng = true; break;
-      case "--json": a.json = true; break;
-      default: fail(`Unknown option ${arg}. See --help.`);
-    }
+/** Send the payload. Never throws: a failed join is one line, not a crash. */
+async function send(payload: RigPayload, idSaved: boolean): Promise<Joined> {
+  try {
+    // Save the id once the person has agreed and before sending, so a retry after a timeout
+    // updates the same entry. Never saved for a no, --no-join, or an unconfigured cluster.
+    if (!idSaved) saveClientId(payload.clientId);
+    return await submitRig(payload);
+  } catch (e) {
+    return { ok: false, reason: e instanceof Error ? e.message : String(e) };
   }
-  if (a.ram != null && (a.ram < 1 || a.ram > 4096)) fail("--ram is in GB, for example --ram 32.");
-  return a;
 }
 
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  let args;
+  try {
+    args = parseArgs(process.argv.slice(2));
+  } catch (e) {
+    if (e instanceof ArgError) {
+      process.stderr.write(`${e.message}\n`);
+      process.exit(1);
+    }
+    throw e;
+  }
+  if (args.help) return out(`${HELP}\n`);
+  if (args.version) return out(`${__VERSION__}\n`);
 
   let gpus: GpuInput[] = args.gpus.map((name) => ({ name, vramMb: null, source: "--gpu flag" }));
   let ramGb = args.ram;
@@ -95,16 +89,85 @@ async function main() {
     process.exit(2);
   }
 
+  const cid = clientIdFor();
+  const payload = buildPayload(receipt.best, ramGb, cid.id, undefined, receipt.bestCount);
+  const decision = decideJoin({
+    join: args.join,
+    noJoin: args.noJoin,
+    json: args.json,
+    interactive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
+    configured: clusterConfigured(),
+    hasPayload: payload != null,
+  });
+
   if (args.json) {
-    process.stdout.write(`${JSON.stringify({ date, ramGb, gpus: receipt.matches, uploaded: false }, null, 2)}\n`);
-    return;
+    const joined = decision === "send" && payload ? await send(payload, cid.saved) : null;
+    const cluster = joined?.ok
+      ? { id: joined.value.id, rank: joined.value.rank, total: joined.value.total, moreThanPct: joined.value.more_than_pct, shareUrl: shareUrl(joined.value.id) }
+      : null;
+    const tier = receipt.tier ? { id: receipt.tier.id, name: receipt.tier.name, line: receipt.tier.line } : null;
+    // What went over the wire, minus the install id.
+    const sent = joined && payload ? (({ clientId: _id, ...rest }) => rest)(payload) : null;
+    const body = {
+      date, ramGb, tier, gpus: receipt.matches,
+      joined: Boolean(joined?.ok), uploaded: Boolean(joined?.ok), sent, cluster,
+      ...(joined && !joined.ok ? { joinError: joined.reason } : {}),
+    };
+    return out(`${JSON.stringify(body, null, 2)}\n`);
   }
 
-  process.stdout.write(`\n${receipt.text}\n\n`);
+  out(`\n${receipt.text}\n\n`);
+
+  let joined: Joined = null;
+  if (payload) {
+    const preview = describePayload(payload).map((l) => `  ${l}`).join("\n");
+    if (decision === "closed") {
+      out("The global cluster opens soon.\n\n");
+    } else if (decision === "hint") {
+      out("To add your rig to the global cluster, run again with --join.\n\n");
+    } else if (decision === "ask") {
+      out(`Join the global VRAM cluster? This is what would be sent:\n${preview}\n`);
+      const yes = await askYesNo("Add your rig to the global cluster? [y/N] ", process.stdin, process.stdout);
+      out("\n");
+      if (yes) joined = await send(payload, cid.saved);
+      else out("Not sent. Nothing left this machine.\n\n");
+    } else if (decision === "send") {
+      out(`Sending to the global cluster (--join):\n${preview}\n\n`);
+      joined = await send(payload, cid.saved);
+    }
+  }
+  if (joined?.ok) {
+    const r = joined.value;
+    out(`You're in the cluster.\n`);
+    if (receipt.tier) out(`  tier     ${receipt.tier.name}\n`);
+    out(`  rank     #${fmt(r.rank)} of ${fmt(r.total)}\n`);
+    out(`  more VRAM than ${r.more_than_pct}% of the cluster\n`);
+    out(`  share    ${shareUrl(r.id)}\n\n`);
+  } else if (joined) {
+    out(`Could not join the cluster: ${joined.reason}. The receipt above is unaffected.\n\n`);
+  }
+
   if (!args.noPng) {
-    const out = resolve(args.png ?? "vram-receipt.png");
-    const res = await renderPng(receipt.lines, out);
-    process.stdout.write(res.ok ? `Image saved: ${out}\n` : `(No image: ${res.reason}. The text above is the receipt.)\n`);
+    const receiptPath = resolve(args.png ?? "vram-receipt.png");
+    const res = await renderPng(receipt.lines, receiptPath);
+    out(res.ok ? `Receipt image: ${receiptPath}\n` : `(No receipt image: ${res.reason}. The text above is the receipt.)\n`);
+
+    const best = receipt.best;
+    if (best && best.vramGb != null && receipt.tier) {
+      const cardPath = resolve(dirname(receiptPath), "thanks-jensen.png");
+      const r = joined?.ok ? joined.value : null;
+      const card = await renderShareCard({
+        gpuModel: rigLabel(best.displayName, receipt.bestCount),
+        vramGb: best.vramGb * receipt.bestCount,
+        ramGb,
+        tier: receipt.tier,
+        rank: r?.rank ?? null,
+        total: r?.total ?? null,
+        moreThanPct: r?.more_than_pct ?? null,
+        date,
+      }, cardPath);
+      out(card.ok ? `Share card:    ${cardPath}\n` : `(No share card: ${card.reason}.)\n`);
+    }
   }
 }
 

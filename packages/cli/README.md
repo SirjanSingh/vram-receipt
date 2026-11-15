@@ -4,15 +4,16 @@
 
 How much VRAM did each GeForce generation give you per launch dollar? This repo is an open dataset
 that answers it for every desktop GeForce card from the 10 series to the 50 series, CPI-adjusted,
-plus a small command that prints a receipt for the GPU and RAM in your own machine.
+plus a small command that prints a receipt for the GPU and RAM in your own machine, gives it a
+tier, and makes a "Thanks, Jensen" card you can share.
 
 ```
 npx vram-receipt
 ```
 
 ```
-VRAM RECEIPT                       (local run, not uploaded)
-DATE 2026-11-16                          MACHINE: --gpu flag
+VRAM RECEIPT                                     (local run)
+DATE 2026-11-15                          MACHINE: --gpu flag
 ------------------------------------------------------------
 GPU    RTX 3060 (12 GB)                       GEN: 30-series
        launch MSRP $329 (MSRP, not street price)
@@ -21,6 +22,9 @@ GPU    RTX 3060 (12 GB)                       GEN: 30-series
        vs gen median MSRP                          16.4 MB/$
 ------------------------------------------------------------
 SYSTEM RAM   32 GB
+------------------------------------------------------------
+TIER   FRONT ROW
+       Close enough to see the jacket shine.
 ------------------------------------------------------------
 STEAM  your VRAM bin: 12 GB
        12.91% of Steam survey machines (Oct 2026)
@@ -32,7 +36,12 @@ unofficial fan project, not affiliated with or endorsed by
 NVIDIA or Jensen Huang
 ```
 
-It also saves the receipt as `vram-receipt.png` in the folder you ran it from.
+It also saves two images in the folder you ran it from: the receipt as `vram-receipt.png` and a
+1200x630 share card, `thanks-jensen.png`, with your VRAM, card and tier.
+
+Then, if you are in a terminal, it shows exactly what it would send and asks whether to add your
+rig to the global VRAM cluster. The default is no. Say yes and you get your rank in the cluster
+and a share link, and the rank goes on the card too.
 
 ## The data
 
@@ -58,23 +67,50 @@ The full method, including the exact formulas, is in [METHOD.md](METHOD.md). Sou
 npx vram-receipt                         # detect this machine
 npx vram-receipt --gpu "RTX 3060 12GB"   # name the card yourself
 npx vram-receipt --ram 32 --paid 450     # set RAM, add what you paid
-npx vram-receipt --no-png                # text only
-npx vram-receipt --json                  # machine-readable
+npx vram-receipt --join                  # add your rig to the global cluster without asking
+npx vram-receipt --no-join               # never ask about the cluster
+npx vram-receipt --no-png                # text only, no images
+npx vram-receipt --json                  # machine-readable, never asks
 ```
 
 - Needs Node 18 or newer. No install step, no postinstall script.
-- **Nothing leaves your machine.** The command makes no network calls; the dataset is bundled
-  inside it. See [PRIVACY.md](PRIVACY.md).
+- **Nothing is sent unless you say yes (or pass `--join`).** The receipt and both images are made
+  on your machine; the dataset is bundled inside the command. The only network request the command
+  can make is the cluster join, and it prints every field first. Piped, scripted and `--json` runs
+  never ask and never send without `--join`. See [PRIVACY.md](PRIVACY.md) for every field.
 - Detection reads `nvidia-smi` for Nvidia cards. For AMD and Intel on Windows the system does not
   report VRAM reliably, so pass `--gpu`. If the tool cannot tell what you have, it says so. It
-  never guesses a number.
+  never guesses a number, and a machine with no known VRAM size gets no tier and is not offered the
+  cluster.
 - Laptop GPUs, AMD, Intel and Apple Silicon get a receipt without the price block, because the
   dataset only covers desktop GeForce cards.
 
+### Tiers
+
+The tier comes from the VRAM of your biggest card. The lines are jokes, not data.
+
+| VRAM | Tier |
+| --- | --- |
+| under 4 GB | Spare Change |
+| 4 GB | Tip Jar |
+| 8 GB | Keynote Ticket |
+| 12 GB | Front Row |
+| 16 GB | Backstage Pass |
+| 24 GB | Leather Jacket |
+| 32 GB and up | The Kitchen |
+
+### The global cluster
+
+An opt-in, public tally of the rigs people chose to add. Your rank is 1 plus the number of rigs with
+more VRAM than yours. It is a self-selected sample, not a survey of PCs; see [METHOD.md](METHOD.md).
+Running the command again updates your entry instead of adding a new one. The cluster is not open
+yet; until it is, the command says so and sends nothing.
+
 ## The page
 
-The web page (chart plus a pick-your-card receipt) currently lives on a `pages.dev` address, not a
-domain of its own. It is a static page with no backend, analytics or cookies.
+The web page (chart, a pick-your-card receipt and the cluster) currently lives on a `pages.dev`
+address, not a domain of its own. It is a static page with no analytics or cookies. The cluster
+numbers come from a small Supabase database (see [PRIVACY.md](PRIVACY.md)).
 
 ## Develop
 
