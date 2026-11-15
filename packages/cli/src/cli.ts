@@ -64,6 +64,16 @@ async function main() {
   }
   if (args.help) return out(`${HELP}\n`);
   if (args.version) return out(`${__VERSION__}\n`);
+  if (args.leave) {
+    const id = readClientId();
+    if (!id) return out("This machine has no cluster entry (no saved id in ~/.vram-receipt).\n");
+    const r = await leaveCluster(id);
+    if (!r.ok) {
+      process.stderr.write(`Could not remove the entry: ${r.reason}\n`);
+      process.exit(1);
+    }
+    return out(r.value.removed > 0 ? "Removed this machine's rig from the global cluster.\n" : "No entry for this machine was in the cluster.\n");
+  }
 
   let gpus: GpuInput[] = args.gpus.map((name) => ({ name, vramMb: null, source: "--gpu flag" }));
   let ramGb = args.ram;
