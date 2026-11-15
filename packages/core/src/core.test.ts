@@ -327,7 +327,7 @@ describe("cluster client (configured, fetch mocked)", () => {
     expect(res).toEqual({ ok: true, value: { id: "abc", rank: 3, total: 10, more_than_pct: 70 } });
     expect(spy).toHaveBeenCalledTimes(1);
     const [url, init] = spy.mock.calls[0]!;
-    expect(url).toBe("https://example.supabase.co/rest/v1/rpc/submit_rig");
+    expect(url).toBe("https://example.supabase.co/functions/v1/join");
     const body = JSON.parse(String(init.body));
     expect(Object.keys(body).sort()).toEqual(["p_client_id", "p_country", "p_generation", "p_gpu_count", "p_gpu_model", "p_ram_gb", "p_source", "p_vram_gb"]);
     expect(body.p_gpu_count).toBe(1);

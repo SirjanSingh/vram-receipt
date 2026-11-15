@@ -56,12 +56,12 @@ export type Result<T> = { ok: true; value: T } | { ok: false; reason: string };
 export const clusterConfigured = () => CLUSTER_URL !== "" && CLUSTER_ANON_KEY !== "";
 export const shareUrl = (id: string) => `${SITE_URL}/?rig=${encodeURIComponent(id)}`;
 
-async function rpc<T>(fn: string, body: Record<string, unknown>, timeoutMs = 8000): Promise<Result<T>> {
+async function call<T>(path: string, body: Record<string, unknown>, timeoutMs = 8000): Promise<Result<T>> {
   if (!clusterConfigured()) return { ok: false, reason: "the cluster is not set up yet" };
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(`${CLUSTER_URL}/rest/v1/rpc/${fn}`, {
+    const res = await fetch(`${CLUSTER_URL}${path}`, {
       method: "POST",
       headers: { apikey: CLUSTER_ANON_KEY, Authorization: `Bearer ${CLUSTER_ANON_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -80,8 +80,15 @@ async function rpc<T>(fn: string, body: Record<string, unknown>, timeoutMs = 800
   }
 }
 
-export function submitRig(p: RigPayload): Promise<Result<SubmitResult>> {
-  return rpc<SubmitResult>("submit_rig", {
+const rpc = <T>(fn: string, body: Record<string, unknown>) => call<T>(`/rest/v1/rpc/${fn}`, body);
+
+/**
+ * Join or update through the `join` edge function, the only write path. The web passes a
+ * Turnstile token; the CLI cannot, and both get the same per-network limit on the server.
+ */
+export function submitRig(p: RigPayload, turnstileToken?: string): Promise<Result<SubmitResult>> {
+  return call<SubmitResult>("/functions/v1/join", {
+    turnstile_token: turnstileToken,
     p_client_id: p.clientId,
     // Same charset the table enforces; anything else would make the insert fail.
     p_gpu_model: p.gpuModel.replace(/[^A-Za-z0-9 .+()\/_-]/g, "").replace(/\s+/g, " ").trim().slice(0, 60) || "Unknown GPU",

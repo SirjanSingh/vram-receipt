@@ -1,5 +1,6 @@
 import { CPI_NOW, SKUS, STEAM_RAM, TIERS, countryFromTimeZone, describePayload, rigLabel, tierFor } from "@vram-receipt/core";
 import type { ClusterStats, RigPayload, Sku } from "@vram-receipt/core";
+import { mountCheck } from "./turnstile";
 import { SITE, UUID_RE, configured, fetchCluster, getRig, leaveCluster, num, shareUrl, submitRig } from "./api";
 import { cardPng, cardSvg, svgUrl } from "./card";
 import { mountCluster } from "./clusterViz";
@@ -354,11 +355,28 @@ function updateJoinUi() {
   }
 }
 
+// Turnstile token for the next send. Tokens are single-use, so the check resets after each send.
+let humanToken: string | null = null;
+let resetCheck: (() => void) | null = null;
+const sendBtn = $<HTMLButtonElement>("send");
+const setToken = (t: string | null) => {
+  humanToken = t;
+  sendBtn.disabled = !t;
+};
+
 joinBtn.addEventListener("click", () => {
   $("payload").textContent = describePayload(payload()).join("\n");
   consent.hidden = false;
   joinBtn.hidden = true;
-  $<HTMLButtonElement>("send").focus();
+  $("join-note").textContent = "";
+  if (!resetCheck) {
+    setToken(null);
+    mountCheck($("human-check"), setToken).then(
+      (reset) => (resetCheck = reset),
+      () => ($("join-note").textContent = "Could not load the human check. Reload and try again."),
+    );
+  }
+  sendBtn.focus();
 });
 $("cancel").addEventListener("click", () => {
   consent.hidden = true;
@@ -370,11 +388,11 @@ $("send").addEventListener("click", async () => {
   send.disabled = true;
   send.textContent = "Sending";
   const p = payload();
-  const r = await submitRig(p);
-  send.disabled = false;
+  const r = await submitRig(p, humanToken ?? undefined);
   send.textContent = "Send it";
+  resetCheck?.();
   if (!r.ok) {
-    $("join-note").textContent = `Not sent: ${r.reason}.`;
+    $("join-note").textContent = `Not sent: ${r.reason.replace(/\.$/, "")}.`;
     consent.hidden = true;
     joinBtn.hidden = false;
     return;

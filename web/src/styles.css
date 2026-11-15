@@ -183,6 +183,8 @@ select:hover, .fields input:hover { border-color: var(--ink-3); }
 .join-cta .fine { margin-top: 8px; }
 .consent { margin-top: 20px; padding: 16px; border-radius: 12px; border: 1px dashed #4a483f; background: #11110f; }
 .consent p { margin: 0 0 8px; font-size: 13px; color: var(--ink-2); }
+.human-check { margin: 0 0 14px; min-height: 65px; }
+.human-check:empty { display: none; }
 .consent pre { margin: 0 0 14px; font: 12.5px/1.6 var(--mono); white-space: pre-wrap; word-break: break-word; color: var(--ink); }
 .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .joined { margin: 16px 0 0; font-size: 14px; color: var(--ink-2); }
