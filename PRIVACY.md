@@ -76,6 +76,10 @@ are deleted after 24 hours and are never public. Your IP address itself is not s
 infrastructure may log requests, including IP addresses, under Supabase's own privacy policy, and I
 do not use those logs.
 
+The "Say thank you" button on the page works the same way: a click sends nothing but the request
+itself, the server keeps a salted hash of your IP for 24 hours so one network can add at most five a
+day, and only the running total is kept. Your browser remembers that you clicked (localStorage).
+
 ### Updating and deleting
 
 - Running the command again with `--join` (or answering yes again) updates the same entry, because

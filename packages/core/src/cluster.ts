@@ -107,6 +107,9 @@ export const leaveCluster = (clientId: string) => rpc<{ removed: number }>("leav
 
 export const fetchCluster = () => rpc<ClusterStats>("cluster_stats", {});
 export const getRig = (id: string) => rpc<RigView | null>("get_rig", { p_id: id });
+export const getThanks = () => rpc<number>("get_thanks", {});
+/** Counted at most five times per network per day; returns the new total either way. */
+export const sayThanks = () => call<{ total: number }>("/functions/v1/thanks", {});
 
 /** Exactly what will be sent, for showing before asking. */
 export function describePayload(p: RigPayload): string[] {

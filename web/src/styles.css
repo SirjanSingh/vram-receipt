@@ -377,3 +377,77 @@ footer a { margin-right: 14px; color: var(--ink-2); }
   .cmd code { font-size: 16px; padding: 12px 14px; }
   .cluster-cap { font-size: 12px; white-space: normal; text-align: center; width: max-content; }
 }
+
+/* Scale: the pooled VRAM against real machines, on a log bar. */
+.scale { margin: 0 0 40px; padding: 30px 32px 22px; border: 1px solid var(--rule); border-radius: 18px; background: var(--panel); }
+.scale h2 { font: 400 clamp(26px, 3.2vw, 40px)/1.1 var(--serif); margin: 0 0 8px; max-width: 30ch; }
+.scale-n { color: var(--vram); }
+.scale-next { margin: 0; color: var(--ink-2); font-size: 14px; max-width: 80ch; }
+.scale-track { position: relative; height: 14px; margin: 64px 0 64px; border-radius: 99px; background: var(--panel-2); border: 1px solid var(--rule); }
+.scale-fill {
+  position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--vram-deep), var(--vram)); box-shadow: 0 0 18px rgba(198, 242, 78, 0.35);
+  transition: width 1.8s var(--ease-out);
+}
+.scale.in .scale-fill { width: var(--x); }
+.scale-dot {
+  position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%;
+  background: var(--ink); border: 4px solid var(--vram); box-shadow: 0 0 0 6px rgba(198, 242, 78, 0.18);
+  opacity: 0; transition: opacity 0.4s 1.6s;
+}
+.scale.in .scale-dot { opacity: 1; }
+.scale-mark { position: absolute; top: 0; height: 100%; width: 0; display: flex; flex-direction: column; align-items: center; }
+.scale-mark::before { content: ""; position: absolute; top: -6px; bottom: -6px; width: 1px; background: var(--ink-3); }
+.scale-mark b, .scale-mark span { position: absolute; white-space: nowrap; transform: translateX(-50%); left: 0; }
+.scale-mark b { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.scale-mark span { font-size: 11px; color: var(--ink-3); }
+.scale-mark[data-lane="0"] b { bottom: calc(100% + 26px); }
+.scale-mark[data-lane="0"] span { bottom: calc(100% + 10px); }
+.scale-mark[data-lane="1"] b { top: calc(100% + 10px); }
+.scale-mark[data-lane="1"] span { top: calc(100% + 26px); }
+.scale-mark[data-lane="2"] b { bottom: calc(100% + 66px); }
+.scale-mark[data-lane="2"] span { bottom: calc(100% + 50px); }
+.scale-mark[data-lane="3"] b { top: calc(100% + 50px); }
+.scale-mark[data-lane="3"] span { top: calc(100% + 66px); }
+.scale-mark[data-lane="2"]::before { top: -46px; }
+.scale-mark[data-lane="3"]::before { bottom: -46px; }
+.scale-track[data-lanes="3"] { margin-top: 104px; }
+.scale-track[data-lanes="4"] { margin-top: 104px; margin-bottom: 104px; }
+.scale-mark.on b { color: var(--vram); }
+.scale-mark.on::before { background: var(--vram); }
+.scale-mark.you b { color: var(--cash); }
+.scale-mark.you::before { background: var(--cash); }
+.scale .fine { margin: 0; }
+
+/* Latest-join line under the counters. */
+.feed { margin: 14px 0 0; font-size: 13px; color: var(--ink-2); min-height: 1.4em; }
+.feed::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--vram); margin-right: 9px; vertical-align: 1px; box-shadow: 0 0 8px var(--vram); }
+.feed b { color: var(--ink); font-weight: 600; }
+.feed.tick { animation: feed-in 0.45s var(--ease-out); }
+@keyframes feed-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* Thank-you button in the letter. */
+.thanks { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 22px 0 0; }
+.thanks-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 99px;
+  border: 1px solid var(--vram); background: transparent; color: var(--vram); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.thanks-btn svg { width: 16px; height: 16px; }
+.thanks-btn:hover { background: rgba(198, 242, 78, 0.1); }
+.thanks-btn.done { background: var(--vram); color: #10120a; cursor: default; }
+.thanks-btn.pop svg { animation: thanks-pop 0.6s var(--ease-out); }
+@keyframes thanks-pop { 40% { transform: scale(1.6); } }
+.thanks-n { font-size: 13px; color: var(--ink-2); }
+.thanks-n b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .scale { padding: 22px 16px 16px; }
+  .scale-track { margin-left: 6px; margin-right: 6px; }
+  .scale-mark b { font-size: 10.5px; }
+  .scale-mark span { font-size: 10px; }
+  .counters { flex-wrap: wrap; gap: 18px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scale-fill, .scale-dot { transition: none; }
+  .feed.tick, .thanks-btn.pop svg { animation: none; }
+}

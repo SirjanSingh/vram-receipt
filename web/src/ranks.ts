@@ -11,7 +11,7 @@ const h = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: s
   if (text != null) e.textContent = text;
   return e;
 };
-const fmtGb = (gb: number) => (gb >= 1024 ? `${(gb / 1024).toFixed(gb >= 10240 ? 0 : 1)} TB` : `${Math.round(gb).toLocaleString("en-US")} GB`);
+const fmtGb = (gb: number) => (gb >= 1000 ? `${(gb / 1000).toFixed(gb >= 10000 ? 0 : 1)} TB` : `${Math.round(gb).toLocaleString("en-US")} GB`);
 const fmtPct = (p: number) => (p >= 10 ? p.toFixed(0) : p.toFixed(1));
 
 export interface YouState {

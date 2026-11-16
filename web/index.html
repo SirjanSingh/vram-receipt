@@ -57,9 +57,11 @@
           <p class="fine">Joins the cluster only if you say yes.</p>
           <dl class="counters" id="counters" hidden>
             <div><dt>VRAM pooled</dt><dd id="c-vram">0 GB</dd></div>
-            <div><dt>Rigs</dt><dd id="c-rigs">0</dd></div>
+            <div><dt>Goodbyes</dt><dd id="c-rigs">0</dd></div>
             <div><dt>Countries</dt><dd id="c-countries">0</dd></div>
+            <div hidden><dt>Thank-yous</dt><dd id="c-thanks">0</dd></div>
           </dl>
+          <p class="feed" id="feed" aria-live="off" hidden></p>
         </div>
 
         <figure class="cluster" id="cluster-fig">
@@ -68,6 +70,8 @@
           <figcaption class="cluster-cap" id="cluster-cap" aria-live="polite"></figcaption>
         </figure>
       </section>
+
+      <section class="scale" id="scale" aria-labelledby="scale-title" hidden></section>
 
       <section class="rev" id="revenue" aria-label="Nvidia revenue, last quarter"></section>
 
@@ -79,6 +83,13 @@
           <p>Every game we stayed up too late for, every model we trained on a gaming card at 2 a.m., ran on something you built.</p>
           <p>Data centers made Nvidia <b class="n" id="why-dc">$89.0B</b> last quarter. The rest of us, <b class="n cash" id="why-edge">$7.2B</b>. But we were here first. So here's our goodbye card: everyone's VRAM, pooled in one place.</p>
           <p class="sign">With love and a few gigabytes, every chip in the cluster</p>
+          <div class="thanks" id="thanks-box" hidden>
+            <button type="button" class="thanks-btn" id="thanks-btn">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s-5.5-3.3-5.5-7.2A3 3 0 0 1 8 4.6a3 3 0 0 1 5.5 2.2C13.5 10.7 8 14 8 14z" fill="currentColor" /></svg>
+              <span id="thanks-label">Say thank you</span>
+            </button>
+            <span class="thanks-n"><b id="thanks-n">0</b> people said thank you</span>
+          </div>
         </article>
         <figure class="jacket" id="jacket">
           <canvas aria-label="A black leather jacket, turning slowly. Drag to spin it."></canvas>

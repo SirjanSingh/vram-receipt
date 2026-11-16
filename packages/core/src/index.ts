@@ -10,7 +10,7 @@ export { VERDICTS } from "./verdicts";
 export { TIERS, tierFor } from "./tiers";
 export type { Tier } from "./tiers";
 export { countryFromTimeZone, countryName } from "./country";
-export { submitRig, leaveCluster, fetchCluster, getRig, describePayload, clusterConfigured, shareUrl, gpuCountOf, rigLabel } from "./cluster";
+export { submitRig, leaveCluster, fetchCluster, getRig, getThanks, sayThanks, describePayload, clusterConfigured, shareUrl, gpuCountOf, rigLabel } from "./cluster";
 export type { RigPayload, SubmitResult, RigView, ClusterStats, Placement, Result } from "./cluster";
 export { shareCardSvg, SHARE_W, SHARE_H } from "./shareCard";
 export type { ShareCardInput } from "./shareCard";

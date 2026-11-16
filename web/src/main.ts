@@ -1,4 +1,4 @@
-import { CPI_NOW, SKUS, STEAM_RAM, TIERS, countryFromTimeZone, describePayload, rigLabel, tierFor } from "@vram-receipt/core";
+import { CPI_NOW, SKUS, STEAM_RAM, TIERS, countryFromTimeZone, countryName, describePayload, getThanks, rigLabel, sayThanks, tierFor } from "@vram-receipt/core";
 import type { ClusterStats, RigPayload, Sku } from "@vram-receipt/core";
 import { SITE, UUID_RE, configured, fetchCluster, getRig, leaveCluster, num, shareUrl, submitRig } from "./api";
 import { cardPng, cardSvg, svgUrl } from "./card";
@@ -7,7 +7,8 @@ import type { Mode } from "./clusterViz";
 import { BUDGET, mountGenJars, mountRevenue } from "./jars";
 import { QUARTER } from "./revenue";
 import { mountJacket } from "./jacket";
-import { fmtGb, renderBoards, renderLadder, renderYou } from "./ranks";
+import { renderBoards, renderLadder, renderYou } from "./ranks";
+import { fmtGb, renderScale } from "./scale";
 import type { YouState } from "./ranks";
 import { blankCount, fillTable, mountChart, pricedCount } from "./chart";
 import type { Basis } from "./chart";
@@ -114,6 +115,8 @@ function paintCluster(intro: boolean) {
     counter($("c-vram"), vram, fmtGb);
     counter($("c-rigs"), total, (n) => Math.round(n).toLocaleString("en-US"));
     counter($("c-countries"), countries, (n) => String(Math.round(n)));
+    renderScale($("scale"), vram, { name: you.sku.model, vramGb: you.vramGb });
+    startFeed(stats.recent);
     viz.setRigs(stats.recent.map((r) => ({ ...r, gpu_model: rigLabel(r.gpu_model, num(r.gpu_count) || 1), vram_gb: num(r.vram_gb) })), myId, intro);
   }
 
@@ -135,6 +138,73 @@ function paintCluster(intro: boolean) {
   );
 }
 
+// One line that steps through the latest joins, newest first.
+const ago = (iso: string) => {
+  const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+  return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`;
+};
+let feedRows: ClusterStats["recent"] = [];
+let feedTimer = 0;
+let feedI = 0;
+function showFeed() {
+  const r = feedRows[feedI % feedRows.length];
+  if (!r) return;
+  const feed = $("feed");
+  const where = r.country ? ` from ${countryName(r.country) ?? r.country}` : "";
+  feed.replaceChildren();
+  const b = document.createElement("b");
+  b.textContent = rigLabel(r.gpu_model, num(r.gpu_count) || 1);
+  feed.append("Latest goodbye: ", b, `${where}, ${ago(r.created_at)}`);
+  feed.classList.remove("tick");
+  void feed.offsetWidth;
+  feed.classList.add("tick");
+  feedI++;
+}
+function startFeed(rows: ClusterStats["recent"]) {
+  feedRows = [...rows].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 12);
+  $("feed").hidden = feedRows.length === 0;
+  if (feedTimer || !feedRows.length) return;
+  showFeed();
+  if (!reduced) feedTimer = window.setInterval(showFeed, 3500);
+}
+
+// The thank-you button. The count is real; one network can add at most five a day.
+let thanks = 0;
+const paintThanks = () => {
+  $("thanks-n").textContent = thanks.toLocaleString("en-US");
+  $("c-thanks").textContent = thanks.toLocaleString("en-US");
+  $("c-thanks").parentElement!.hidden = thanks === 0;
+};
+async function loadThanks() {
+  if (!LIVE) return;
+  const r = await getThanks();
+  if (!r.ok) return;
+  thanks = num(r.value);
+  $("thanks-box").hidden = false;
+  paintThanks();
+  if (store.get("vr-thanked")) markThanked();
+}
+function markThanked() {
+  const btn = $<HTMLButtonElement>("thanks-btn");
+  btn.classList.add("done");
+  $("thanks-label").textContent = "Thanked";
+}
+$("thanks-btn").addEventListener("click", async () => {
+  const btn = $<HTMLButtonElement>("thanks-btn");
+  if (btn.classList.contains("done")) return;
+  thanks++;
+  paintThanks();
+  markThanked();
+  btn.classList.add("pop");
+  store.set("vr-thanked", "1");
+  const r = await sayThanks();
+  if (r.ok) {
+    thanks = Math.max(thanks, num(r.value.total));
+    paintThanks();
+  }
+});
+void loadThanks();
+
 async function poll(intro = false) {
   if (!LIVE) return;
   const r = await fetchCluster();
@@ -148,6 +218,7 @@ async function poll(intro = false) {
   lastBoards = key;
   renderBoards(stats, LIVE, failed);
   renderYou(you, stats, LIVE);
+  if (stats) renderScale($("scale"), num(stats.total_vram_gb), { name: you.sku.model, vramGb: you.vramGb });
   renderLadder($("ladder"), you.vramGb, stats);
 }
 let lastBoards = "";
@@ -307,6 +378,7 @@ function pick() {
   tierBox.classList.add("pop");
   renderLadder($("ladder"), sku.vramGb, stats);
   renderYou(you, stats, LIVE);
+  if (stats) renderScale($("scale"), num(stats.total_vram_gb), { name: you.sku.model, vramGb: you.vramGb });
   if (!you.joined) viz.setPreview({ vramGb: sku.vramGb, label: `${sku.model} ${sku.vramGb} GB` });
   else viz.setPreview(null);
   updateJoinUi();
@@ -395,6 +467,7 @@ $("send").addEventListener("click", async () => {
   history.replaceState(null, "", `?rig=${encodeURIComponent(v.id)}`);
   updateJoinUi();
   renderYou(you, stats, LIVE);
+  if (stats) renderScale($("scale"), num(stats.total_vram_gb), { name: you.sku.model, vramGb: you.vramGb });
   void renderCard();
   void poll();
 });
