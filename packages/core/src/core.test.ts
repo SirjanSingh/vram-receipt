@@ -145,37 +145,35 @@ describe("buildReceipt", () => {
   it("full receipt for a priced desktop card", () => {
     const r = buildReceipt({ gpus: [flag("RTX 3060 12GB")], ramGb: 32, date });
     expect(r.priced).toBe(true);
-    expect(r.text).toContain("launch MSRP $329 (MSRP, not street price)");
-    expect(r.text).toContain("in today's dollars (CPI)");
-    expect(r.text).toContain("VRAM per launch dollar");
-    expect(r.text).toContain("vs gen median MSRP");
-    expect(r.text).toContain("SYSTEM RAM   32 GB");
-    expect(r.text).toContain("your VRAM bin: 12 GB");
-    expect(r.text).toContain("Survived the shortage. Kept the card.");
-    expect(r.text).toContain("not affiliated with or endorsed by");
+    expect(r.text).toContain("launch price $329");
+    expect(r.text).toContain("gen median");
+    expect(r.text).toMatch(/RAM\s+32 GB/);
+    expect(r.text).toMatch(/STEAM  more VRAM than \d+% of Steam PCs/);
+    expect(r.text).toContain("THANK YOU, JENSEN.");
+    expect(r.text).toContain("Not affiliated with NVIDIA or Jensen Huang");
   });
   it("no price block for a laptop GPU", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 4050 Laptop GPU", 6141)], ramGb: 16, date });
     expect(r.priced).toBe(false);
-    expect(r.text).toContain("RTX 4050 Laptop GPU (6 GB)");
-    expect(r.text).not.toContain("launch MSRP $");
-    expect(r.text).toContain("your VRAM bin: 6 GB");
+    expect(r.text).toMatch(/RTX 4050 Laptop GPU\s+6 GB/);
+    expect(r.text).not.toContain("launch price $");
+    expect(r.text).toContain("no launch price on file");
   });
   it("no price for a row without a confirmed MSRP", () => {
     const r = buildReceipt({ gpus: [flag("GTX 1050 Ti")], ramGb: 8, date });
     expect(r.priced).toBe(false);
-    expect(r.text).toContain("no launch MSRP confirmed");
+    expect(r.text).toContain("no launch price on file");
   });
   it("prints one block per GPU and places the larger one on Steam", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 3090", 24576), smi("NVIDIA GeForce RTX 3060", 12288)], ramGb: 64, date });
     expect(r.lines.filter((l) => l.startsWith("GPU")).length).toBe(2);
-    expect(r.text).toContain("your VRAM bin: 24 GB");
+    expect(r.best?.vramGb).toBe(24);
   });
   it("unified memory is not double counted", () => {
     const r = buildReceipt({ gpus: [{ name: "Apple M2 Pro", vramMb: null, source: "systeminformation", unified: true }], ramGb: 32, date });
-    expect(r.text).toContain("(unified memory)");
-    expect(r.text).toContain("no dedicated VRAM size");
-    expect(r.text).toContain("SYSTEM RAM   32 GB");
+    expect(r.text).toContain("unified memory");
+    expect(r.text).toContain("no dedicated VRAM");
+    expect(r.text).toMatch(/RAM\s+32 GB/);
   });
   it("never exceeds the receipt width and has no em dashes", () => {
     const inputs = [
@@ -224,9 +222,9 @@ describe("receipt tier line", () => {
     expect(r.text).toContain("TIER   LEATHER JACKET");
     expect(r.text).toContain(tierFor(24).line);
   });
-  it("header says local run and nothing that would become false after a join", () => {
+  it("header shows the date and nothing that would become false after a join", () => {
     const r = buildReceipt({ gpus: [flag("RTX 3060 12GB")], ramGb: 32, date });
-    expect(r.lines[0]).toMatch(/^VRAM RECEIPT +\(local run\)$/);
+    expect(r.lines[0]).toMatch(/^VRAM RECEIPT +2026-11-16$/);
     expect(r.text).not.toContain("not uploaded");
   });
   it("no tier without a dedicated VRAM size", () => {
@@ -392,8 +390,8 @@ describe("multi-GPU servers", () => {
   it("prints identical cards once with a count and a VRAM total", () => {
     const r = buildReceipt({ gpus: Array.from({ length: 8 }, v100), ramGb: 512, date });
     expect(r.lines.filter((l) => l.startsWith("GPU")).length).toBe(1);
-    expect(r.text).toContain("8x Tesla V100-SXM2 (32 GB each)");
-    expect(r.text).toMatch(/TOTAL VRAM\s+256 GB across 8 GPUs/);
+    expect(r.text).toMatch(/8x Tesla V100-SXM2\s+8 x 32 GB/);
+    expect(r.text).toMatch(/TOTAL VRAM\s+256 GB/);
     expect(r.tier?.id).toBe("the-kitchen");
   });
   it("keeps different cards on separate lines", () => {

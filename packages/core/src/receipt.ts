@@ -1,7 +1,6 @@
 import { SKUS, STEAM_VRAM, STEAM_SURVEY_LABEL } from "./generated/data";
 import { matchGpu, sizesFor } from "./match";
 import { genMedianMbPerDollar, steamPlacement } from "./metrics";
-import { VERDICTS } from "./verdicts";
 import { tierFor } from "./tiers";
 import type { Tier } from "./tiers";
 import type { GpuInput, MatchResult } from "./types";
@@ -34,9 +33,6 @@ export interface Receipt {
   tier: Tier | null;
 }
 
-/** Header right side. The page swaps this string for its own wording. */
-export const RECEIPT_TAG = "(local run)";
-
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 const fixed1 = (n: number) => n.toFixed(1);
 
@@ -66,46 +62,35 @@ const IND = "       ";
 
 function gpuBlock(gpu: GpuInput, m: MatchResult, paidUsd: number | null | undefined, first: boolean, count = 1): string[] {
   const out: string[] = [];
-  const size = gpu.unified ? "unified memory" : m.vramGb != null ? `${m.vramGb} GB${count > 1 ? " each" : ""}` : "VRAM unknown";
-  const gen = m.generation != null ? `GEN: ${m.generation}-series` : "";
-  out.push(...row(`GPU    ${count > 1 ? `${count}x ` : ""}${m.displayName} (${size})`, gen));
+  const size = gpu.unified ? "unified memory" : m.vramGb != null ? `${count > 1 ? `${count} x ` : ""}${m.vramGb} GB` : "size unknown";
+  out.push(...row(`GPU    ${count > 1 ? `${count}x ` : ""}${m.displayName}`, size));
 
   if (m.kind === "desktop-sku" && m.sku && m.sku.msrpUsd != null && m.sku.mbPerDollar != null) {
     const s = m.sku;
-    out.push(`${IND}launch MSRP ${money(s.msrpUsd!)} (MSRP, not street price)`);
-    if (s.msrpRealUsd != null) out.push(`${IND}= ${money(s.msrpRealUsd)} in today's dollars (CPI)`);
-    out.push(...row(`${IND}VRAM per launch dollar`, `${fixed1(s.mbPerDollar!)} MB/$`));
     const med = genMedianMbPerDollar(s.generation, SKUS);
-    if (med != null) out.push(...row(`${IND}vs gen median MSRP`, `${fixed1(med)} MB/$`));
+    out.push(...row(`${IND}launch price ${money(s.msrpUsd!)}`, `${fixed1(s.mbPerDollar!)} MB/$${med != null ? `, gen median ${fixed1(med)}` : ""}`));
   } else if (gpu.unified) {
-    out.push(...wrap("shared with system RAM, so it is counted once, below", IND));
-  } else if (m.kind === "laptop") {
-    out.push(...wrap("laptop GPU: no launch MSRP in the dataset (desktop GeForce only)", IND));
+    out.push(`${IND}shared with system RAM, counted once below`);
   } else if (m.kind === "known-model-other-vram") {
-    const sizes = sizesFor(m.displayName, SKUS).map((g) => `${g} GB`).join(" / ");
+    const sizes = sizesFor(m.displayName, SKUS);
     out.push(...wrap(
       m.vramGb == null
-        ? `sold as ${sizes}: say which one, e.g. --gpu "${m.displayName} ${sizesFor(m.displayName, SKUS)[0]}GB"`
-        : `no ${m.vramGb} GB row for this model in the dataset (it lists ${sizes})`,
+        ? `sold as ${sizes.map((g) => `${g} GB`).join(" / ")}: pass --gpu "${m.displayName} ${sizes[0]}GB"`
+        : `no launch price on file for the ${m.vramGb} GB version`,
       IND,
     ));
-  } else if (m.kind === "desktop-sku") {
-    out.push(...wrap("no launch MSRP confirmed from a primary source for this card", IND));
   } else {
-    out.push(...wrap("no launch MSRP in the dataset for this card (desktop GeForce only)", IND));
+    out.push(`${IND}no launch price on file`);
   }
-  if (first && paidUsd != null) out.push(...row("PAID   (you typed it)", money(paidUsd)));
+  if (first && paidUsd != null) out.push(...row(`${IND}you paid`, money(paidUsd)));
   return out;
 }
 
 export function buildReceipt(input: ReceiptInput): Receipt {
   const matches = input.gpus.map((g) => matchGpu(g, SKUS));
-  const sources = [...new Set(input.gpus.map((g) => g.source))];
-  const machine = sources.map((s) => (s === "nvidia-smi" || s === "systeminformation" ? `detected via ${s}` : s)).join(" + ");
 
   const lines: string[] = [];
-  lines.push(...row("VRAM RECEIPT", RECEIPT_TAG));
-  lines.push(...row(`DATE ${input.date}`, `MACHINE: ${machine}`));
+  lines.push(...row("VRAM RECEIPT", input.date));
   lines.push(RULE);
   // Identical cards (a multi-GPU server) print once with a count instead of N copies.
   const groups: { gpu: GpuInput; m: MatchResult; count: number }[] = [];
@@ -119,10 +104,9 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   const dedicated = matches.filter((m, i) => !input.gpus[i]!.unified && m.vramGb != null);
   if (dedicated.length > 1) {
     const total = dedicated.reduce((s, m) => s + m.vramGb!, 0);
-    lines.push(...row("TOTAL VRAM", `${total} GB across ${dedicated.length} GPUs`));
+    lines.push(...row("TOTAL VRAM", `${total} GB`));
   }
-  lines.push(RULE);
-  lines.push(input.ramGb != null ? `SYSTEM RAM   ${input.ramGb} GB` : "SYSTEM RAM   not detected (pass --ram 32)");
+  lines.push(...row("RAM", input.ramGb != null ? `${input.ramGb} GB` : "not detected (pass --ram 32)"));
   lines.push(RULE);
 
   // The tier uses the card with the most VRAM, times how many identical copies of it the
@@ -134,26 +118,14 @@ export function buildReceipt(input: ReceiptInput): Receipt {
     lines.push(`TIER   ${tier.name.toUpperCase()}`);
     lines.push(...wrap(tier.line, IND));
   } else {
-    lines.push("TIER   none (no dedicated VRAM size to rank)");
+    lines.push("TIER   none (no dedicated VRAM to rank)");
   }
-  lines.push(RULE);
   const placement = best ? steamPlacement(best.vramGb!, STEAM_VRAM) : null;
-  if (placement) {
-    lines.push(`STEAM  your VRAM bin: ${placement.bin.bin}`);
-    lines.push(`${IND}${placement.bin.sharePct.toFixed(2)}% of Steam survey machines (${STEAM_SURVEY_LABEL})`);
-    lines.push(`${IND}more VRAM than ${fixed1(placement.moreThanPct)}% (method: METHOD.md)`);
-  } else {
-    lines.push("STEAM  no dedicated VRAM size to place on the survey");
-  }
-  const gen = matches.find((m) => m.generation != null && m.kind !== "not-in-dataset")?.generation;
-  if (gen != null && VERDICTS[gen]) lines.push(...wrap(`VERDICT  ${VERDICTS[gen]}`, ""));
+  if (placement) lines.push(...row(`STEAM  more VRAM than ${Math.round(placement.moreThanPct)}% of Steam PCs`, STEAM_SURVEY_LABEL));
   lines.push(RULE);
   // A receipt ends with a thank-you. This one is a goodbye: he stepped down on Nov 12, 2026.
   lines.push(...row("THANK YOU, JENSEN.", "1993 to 2026"));
-  lines.push(RULE);
-  lines.push(`Data: ${DATA_URL} (CC BY-SA 4.0)`);
-  lines.push("unofficial fan project, not affiliated with or endorsed by");
-  lines.push("NVIDIA or Jensen Huang");
+  lines.push("Fan project. Not affiliated with NVIDIA or Jensen Huang.");
 
   const priced = matches.some((m) => m.kind === "desktop-sku" && m.sku?.msrpUsd != null);
   return { lines, text: lines.join("\n"), matches, priced, best, bestCount, tier };

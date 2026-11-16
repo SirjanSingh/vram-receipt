@@ -12,30 +12,18 @@ npx vram-receipt
 ```
 
 ```
-VRAM RECEIPT                                     (local run)
-DATE 2026-11-15                          MACHINE: --gpu flag
+VRAM RECEIPT                                      2026-11-16
 ------------------------------------------------------------
-GPU    RTX 3060 (12 GB)                       GEN: 30-series
-       launch MSRP $329 (MSRP, not street price)
-       = $421 in today's dollars (CPI)
-       VRAM per launch dollar                      37.4 MB/$
-       vs gen median MSRP                          16.4 MB/$
-------------------------------------------------------------
-SYSTEM RAM   32 GB
+GPU    RTX 3060                                        12 GB
+       launch price $329          37.4 MB/$, gen median 16.4
+RAM                                                    32 GB
 ------------------------------------------------------------
 TIER   FRONT ROW
        Close enough to see the jacket shine.
-------------------------------------------------------------
-STEAM  your VRAM bin: 12 GB
-       12.91% of Steam survey machines (Oct 2026)
-       more VRAM than 50.5% (method: METHOD.md)
-VERDICT  Survived the shortage. Kept the card.
+STEAM  more VRAM than 50% of Steam PCs              Oct 2026
 ------------------------------------------------------------
 THANK YOU, JENSEN.                              1993 to 2026
-------------------------------------------------------------
-Data: github.com/SirjanSingh/vram-receipt (CC BY-SA 4.0)
-unofficial fan project, not affiliated with or endorsed by
-NVIDIA or Jensen Huang
+Fan project. Not affiliated with NVIDIA or Jensen Huang.
 ```
 
 It also saves two images in the folder you ran it from: the receipt as `vram-receipt.png` and a
