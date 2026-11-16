@@ -5,7 +5,6 @@ import { cardPng, cardSvg, svgUrl } from "./card";
 import { mountCluster } from "./clusterViz";
 import type { Mode } from "./clusterViz";
 import { BUDGET, mountGenJars, mountRevenue } from "./jars";
-import { QUARTER } from "./revenue";
 import { mountJacket } from "./jacket";
 import { renderBoards, renderLadder, renderYou } from "./ranks";
 import { fmtGb, renderScale } from "./scale";
@@ -599,6 +598,4 @@ void restoreMine();
 void showTheirs();
 
 // ---- the thank-you note: numbers come from the same data as the revenue bar ----
-$("why-dc").textContent = `$${QUARTER.dataCenterB.toFixed(1)}B`;
-$("why-edge").textContent = `$${QUARTER.edgeB.toFixed(1)}B`;
 mountJacket($("jacket"));
