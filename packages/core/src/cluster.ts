@@ -82,13 +82,9 @@ async function call<T>(path: string, body: Record<string, unknown>, timeoutMs = 
 
 const rpc = <T>(fn: string, body: Record<string, unknown>) => call<T>(`/rest/v1/rpc/${fn}`, body);
 
-/**
- * Join or update through the `join` edge function, the only write path. The web passes a
- * Turnstile token; the CLI cannot, and both get the same per-network limit on the server.
- */
-export function submitRig(p: RigPayload, turnstileToken?: string): Promise<Result<SubmitResult>> {
+/** Join or update through the `join` edge function, the only write path, with a per-network limit. */
+export function submitRig(p: RigPayload): Promise<Result<SubmitResult>> {
   return call<SubmitResult>("/functions/v1/join", {
-    turnstile_token: turnstileToken,
     p_client_id: p.clientId,
     // Same charset the table enforces; anything else would make the insert fail.
     p_gpu_model: p.gpuModel.replace(/[^A-Za-z0-9 .+()\/_-]/g, "").replace(/\s+/g, " ").trim().slice(0, 60) || "Unknown GPU",

@@ -61,9 +61,9 @@ export function leaveCluster(clientId: string): Promise<Result<{ removed: number
   return o ? devRpc<{ removed: number }>(o, "leave_cluster", { p_client_id: clientId }) : coreLeave(clientId);
 }
 
-export function submitRig(p: RigPayload, turnstileToken?: string): Promise<Result<SubmitResult>> {
+export function submitRig(p: RigPayload): Promise<Result<SubmitResult>> {
   const o = devOverride();
-  if (!o) return coreSubmit(p, turnstileToken);
+  if (!o) return coreSubmit(p);
   return devRpc<SubmitResult>(o, "submit_rig", {
     p_client_id: p.clientId, p_gpu_model: p.gpuModel.slice(0, 60), p_vram_gb: p.vramGb, p_ram_gb: p.ramGb,
     p_generation: p.generation, p_country: p.country, p_source: p.source, p_gpu_count: p.gpuCount ?? 1,

@@ -94,10 +94,7 @@ id kept in your browser (localStorage). If you choose "Laptop or other GPU", the
 type is sent as the GPU model (letters, digits and basic punctuation only), so don't type anything
 personal there. "Remove my rig from the cluster" on the page deletes your entry using that id.
 
-When you open the join step, the page loads Cloudflare Turnstile, a check that you are not a bot.
-It runs only then, not on page load, and Cloudflare processes it under its own
-[Turnstile privacy addendum](https://www.cloudflare.com/turnstile-privacy-policy/). Apart from that
-there are no cookies, analytics, trackers or advertising scripts. The host
+There are no cookies, analytics, trackers or advertising scripts. The host
 (Cloudflare Pages) keeps standard server logs, which I do not have access to in identifiable form.
 
 ## If this changes

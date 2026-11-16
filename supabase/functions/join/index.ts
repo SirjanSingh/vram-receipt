@@ -1,8 +1,7 @@
-// The only way to join the cluster. Web joins must carry a Turnstile token; CLI joins cannot solve
-// one, so every join, with or without a token, gets the same per-network limit in submit_rig_gated.
+// The only way to join the cluster. Every join gets the same per-network limit in submit_rig_gated.
 // The caller's IP is hashed with a secret salt and never stored or logged in the clear.
 //
-// Secrets (set with `supabase secrets set`, never in the repo): TURNSTILE_SECRET, IP_SALT.
+// Secret (set with `supabase secrets set`, never in the repo): IP_SALT.
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by the platform.
 
 const CORS = {
@@ -36,20 +35,6 @@ async function sha256Hex(s: string): Promise<string> {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function turnstileOk(token: string, ip: string, secret: string): Promise<boolean> {
-  try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ secret, response: token, remoteip: ip }),
-    });
-    const data = await res.json();
-    return data?.success === true;
-  } catch {
-    return false;
-  }
-}
-
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req) => {
@@ -57,11 +42,10 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return fail(405, "POST only");
 
   const salt = Deno.env.get("IP_SALT");
-  const secret = Deno.env.get("TURNSTILE_SECRET");
   const url = Deno.env.get("SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   // Fail closed: without its secrets the gate refuses everything.
-  if (!salt || !secret || !url || !key) return fail(503, "Joining is paused right now.");
+  if (!salt || !url || !key) return fail(503, "Joining is paused right now.");
 
   const ip = clientIp(req);
   if (!ip) return fail(400, "Could not read your network address.");
@@ -74,11 +58,6 @@ Deno.serve(async (req) => {
   }
   if (typeof b.p_client_id !== "string" || !UUID.test(b.p_client_id)) return fail(400, "Bad request.");
 
-  const token = typeof b.turnstile_token === "string" ? b.turnstile_token.slice(0, 2048) : "";
-  if (b.p_source === "web" || token) {
-    if (!token || !(await turnstileOk(token, ip, secret))) return fail(403, "The human check failed. Reload and try again.");
-  }
-
   const res = await fetch(`${url}/rest/v1/rpc/submit_rig_gated`, {
     method: "POST",
     headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -90,8 +69,7 @@ Deno.serve(async (req) => {
       p_ram_gb: b.p_ram_gb ?? null,
       p_generation: b.p_generation ?? null,
       p_country: b.p_country ?? null,
-      // Without a token the join is a CLI join, whatever the body says.
-      p_source: token ? "web" : "cli",
+      p_source: b.p_source === "web" ? "web" : "cli",
       p_gpu_count: b.p_gpu_count ?? 1,
     }),
   });

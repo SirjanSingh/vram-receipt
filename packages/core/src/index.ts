@@ -14,4 +14,4 @@ export { submitRig, leaveCluster, fetchCluster, getRig, describePayload, cluster
 export type { RigPayload, SubmitResult, RigView, ClusterStats, Placement, Result } from "./cluster";
 export { shareCardSvg, SHARE_W, SHARE_H } from "./shareCard";
 export type { ShareCardInput } from "./shareCard";
-export { SITE_URL, TURNSTILE_SITE_KEY } from "./clusterConfig";
+export { SITE_URL } from "./clusterConfig";
