@@ -23,7 +23,6 @@ TIER   FRONT ROW
 STEAM  more VRAM than 50% of Steam PCs              Oct 2026
 ------------------------------------------------------------
 THANK YOU, JENSEN.                              1993 to 2026
-Fan project. Not affiliated with NVIDIA or Jensen Huang.
 ```
 
 It also saves two images in the folder you ran it from: the receipt as `vram-receipt.png` and a

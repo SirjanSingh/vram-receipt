@@ -150,7 +150,6 @@ describe("buildReceipt", () => {
     expect(r.text).toMatch(/RAM\s+32 GB/);
     expect(r.text).toMatch(/STEAM  more VRAM than \d+% of Steam PCs/);
     expect(r.text).toContain("THANK YOU, JENSEN.");
-    expect(r.text).toContain("Not affiliated with NVIDIA or Jensen Huang");
   });
   it("no price block for a laptop GPU", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 4050 Laptop GPU", 6141)], ramGb: 16, date });

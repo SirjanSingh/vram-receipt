@@ -125,7 +125,6 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   lines.push(RULE);
   // A receipt ends with a thank-you. This one is a goodbye: he stepped down on Nov 12, 2026.
   lines.push(...row("THANK YOU, JENSEN.", "1993 to 2026"));
-  lines.push("Fan project. Not affiliated with NVIDIA or Jensen Huang.");
 
   const priced = matches.some((m) => m.kind === "desktop-sku" && m.sku?.msrpUsd != null);
   return { lines, text: lines.join("\n"), matches, priced, best, bestCount, tier };
