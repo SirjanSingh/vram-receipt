@@ -128,19 +128,6 @@ h1 {
   transform: translate(-50%, calc(-100% - 10px));
 }
 
-/* ---- revenue strip ---- */
-.rev { margin: 0 0 40px; }
-.rev-bar { display: flex; height: 46px; border-radius: 10px; overflow: hidden; background: var(--panel); border: 1px solid var(--rule); }
-.rev-bar > span { width: var(--w); clip-path: inset(0 100% 0 0); transition: clip-path 1.6s var(--ease-out); display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
-.rev.run .rev-bar > span { clip-path: inset(0 0 0 0); }
-.rev.still .rev-bar > span { transition: none; }
-.rev-dc { background: linear-gradient(90deg, #3c4a17, var(--vram-deep)); padding-left: 16px; font-size: 14px; color: var(--ink); }
-.rev-dc b { font: 400 24px/1 var(--serif); color: var(--vram); margin-right: 8px; }
-.rev-edge { background: var(--cash); transition-delay: 0.9s !important; }
-.rev-other { background: #5f5b4f; }
-.rev-cap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 10px 0 0; font-size: 12.5px; color: var(--ink-2); }
-.rev-cap a { color: var(--ink-2); }
-.rev-cap b { font: 400 20px/1 var(--serif); }
 
 /* ---- blocks ---- */
 .block { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 32px; margin: 0 0 28px; }
@@ -370,8 +357,6 @@ footer a { margin-right: 14px; color: var(--ink-2); }
   .ladder li { padding: 6px 2px; }
   .l-name { display: none; }
   .rank-grid { grid-template-columns: 1fr; }
-  .rev-dc { font-size: 12px; padding-left: 10px; }
-  .rev-dc b { font-size: 20px; }
   .data > summary { padding: 20px 16px; font-size: 26px; }
   .data-body { padding: 0 16px 22px; }
   .cmd code { font-size: 16px; padding: 12px 14px; }

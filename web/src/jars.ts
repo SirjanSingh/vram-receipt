@@ -1,5 +1,4 @@
 import { SKUS, median } from "@vram-receipt/core";
-import { QUARTER } from "./revenue";
 
 const NS = "http://www.w3.org/2000/svg";
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -21,24 +20,6 @@ function onceVisible(node: Element, fn: () => void, threshold = 0.35) {
     }
   }, { threshold });
   io.observe(node);
-}
-
-// ---- revenue strip: one quarter, split into where the money came from ----
-export function mountRevenue(host: HTMLElement) {
-  const q = QUARTER;
-  const other = Math.max(0, q.totalB - q.dataCenterB - q.edgeB);
-  const pct = (v: number) => `${((v / q.totalB) * 100).toFixed(2)}%`;
-  host.innerHTML = `
-    <div class="rev-bar" role="img" aria-label="Nvidia revenue ${q.label}: $${q.dataCenterB.toFixed(1)} billion data center, $${q.edgeB.toFixed(1)} billion Edge Computing, of $${q.totalB.toFixed(1)} billion total.">
-      <span class="rev-dc" style="--w:${pct(q.dataCenterB)}"><b>$${q.dataCenterB.toFixed(1)}B</b> data center</span>
-      <span class="rev-edge" style="--w:${pct(q.edgeB)}"></span>
-      ${other > 0.05 ? `<span class="rev-other" style="--w:${pct(other)}"></span>` : ""}
-    </div>
-    <p class="rev-cap"><span><b class="cash">$${q.edgeB.toFixed(1)}B</b> Edge Computing (PCs, consoles, more)</span>
-      <span>Nvidia, ${q.label}. <a href="${q.sourceUrl}">Source</a> · <a href="${q.definitionUrl}">Segments</a></span></p>`;
-  const run = () => host.classList.add("run");
-  if (reduced) host.classList.add("run", "still");
-  else onceVisible(host, run, 0.4);
 }
 
 // ---- six generation jars -------------------------------------------------

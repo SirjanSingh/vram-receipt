@@ -4,7 +4,7 @@ import { SITE, UUID_RE, configured, fetchCluster, getRig, leaveCluster, num, sha
 import { cardPng, cardSvg, svgUrl } from "./card";
 import { mountCluster } from "./clusterViz";
 import type { Mode } from "./clusterViz";
-import { BUDGET, mountGenJars, mountRevenue } from "./jars";
+import { BUDGET, mountGenJars } from "./jars";
 import { mountJacket } from "./jacket";
 import { renderBoards, renderLadder, renderYou } from "./ranks";
 import { fmtGb, renderScale } from "./scale";
@@ -66,7 +66,6 @@ $("ladder").setAttribute("aria-label", `All ${TIERS.length} tiers`);
   const month = new Date(y!, m! - 1, 1).toLocaleString("en-US", { month: "short", year: "numeric" });
   $("cav-jars").textContent = `Desktop cards only. Jars: $${BUDGET} in ${month} dollars at each generation's median.`;
 }
-mountRevenue($("revenue"));
 mountGenJars($("gen-jars"), $("jars-verdict"), $<HTMLButtonElement>("replay"));
 
 const cmdBtn = $<HTMLButtonElement>("copy-cmd");
@@ -597,5 +596,5 @@ pick();
 void restoreMine();
 void showTheirs();
 
-// ---- the thank-you note: numbers come from the same data as the revenue bar ----
+// ---- the farewell letter ----
 mountJacket($("jacket"));
