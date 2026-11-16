@@ -14,13 +14,16 @@ npx vram-receipt
 ```
 VRAM RECEIPT                                      2026-11-16
 ------------------------------------------------------------
-GPU    RTX 3060                                        12 GB
-       launch price $329          37.4 MB/$, gen median 16.4
-RAM                                                    32 GB
+Graphics card                                       RTX 3060
+  Video memory (VRAM)                                  12 GB
+  Price at launch                                       $329
+System memory (RAM)                                    32 GB
 ------------------------------------------------------------
-TIER   FRONT ROW
-       Close enough to see the jacket shine.
-STEAM  more VRAM than 50% of Steam PCs              Oct 2026
+More VRAM than 50% of gamers on Steam.
+Good value: 2.3x the memory per dollar of its series.
+------------------------------------------------------------
+YOUR RANK                                          FRONT ROW
+Close enough to see the jacket shine.
 ------------------------------------------------------------
 THANK YOU, JENSEN.                              1993 to 2026
 ```

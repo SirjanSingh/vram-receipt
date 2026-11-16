@@ -145,34 +145,35 @@ describe("buildReceipt", () => {
   it("full receipt for a priced desktop card", () => {
     const r = buildReceipt({ gpus: [flag("RTX 3060 12GB")], ramGb: 32, date });
     expect(r.priced).toBe(true);
-    expect(r.text).toContain("launch price $329");
-    expect(r.text).toContain("gen median");
-    expect(r.text).toMatch(/RAM\s+32 GB/);
-    expect(r.text).toMatch(/STEAM  more VRAM than \d+% of Steam PCs/);
+    expect(r.text).toMatch(/Price at launch\s+\$329/);
+    expect(r.text).toContain("Good value: 2.3x the memory per dollar of its series.");
+    expect(r.text).toMatch(/System memory \(RAM\)\s+32 GB/);
+    expect(r.text).toMatch(/More VRAM than \d+% of gamers on Steam\./);
     expect(r.text).toContain("THANK YOU, JENSEN.");
   });
   it("no price block for a laptop GPU", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 4050 Laptop GPU", 6141)], ramGb: 16, date });
     expect(r.priced).toBe(false);
-    expect(r.text).toMatch(/RTX 4050 Laptop GPU\s+6 GB/);
-    expect(r.text).not.toContain("launch price $");
-    expect(r.text).toContain("no launch price on file");
+    expect(r.text).toMatch(/RTX 4050 Laptop GPU/);
+    expect(r.text).toMatch(/Video memory \(VRAM\)\s+6 GB/);
+    expect(r.text).not.toMatch(/Price at launch\s+\$/);
+    expect(r.text).toMatch(/Price at launch\s+not on file/);
   });
   it("no price for a row without a confirmed MSRP", () => {
     const r = buildReceipt({ gpus: [flag("GTX 1050 Ti")], ramGb: 8, date });
     expect(r.priced).toBe(false);
-    expect(r.text).toContain("no launch price on file");
+    expect(r.text).toMatch(/Price at launch\s+not on file/);
   });
   it("prints one block per GPU and places the larger one on Steam", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 3090", 24576), smi("NVIDIA GeForce RTX 3060", 12288)], ramGb: 64, date });
-    expect(r.lines.filter((l) => l.startsWith("GPU")).length).toBe(2);
+    expect(r.lines.filter((l) => l.startsWith("Graphics card")).length).toBe(2);
     expect(r.best?.vramGb).toBe(24);
   });
   it("unified memory is not double counted", () => {
     const r = buildReceipt({ gpus: [{ name: "Apple M2 Pro", vramMb: null, source: "systeminformation", unified: true }], ramGb: 32, date });
-    expect(r.text).toContain("unified memory");
-    expect(r.text).toContain("no dedicated VRAM");
-    expect(r.text).toMatch(/RAM\s+32 GB/);
+    expect(r.text).toContain("shared with RAM");
+    expect(r.text).toContain("none (no separate video memory)");
+    expect(r.text).toMatch(/System memory \(RAM\)\s+32 GB/);
   });
   it("never exceeds the receipt width and has no em dashes", () => {
     const inputs = [
@@ -218,7 +219,7 @@ describe("receipt tier line", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 3060", 12288), smi("NVIDIA GeForce RTX 3090", 24576)], ramGb: 64, date });
     expect(r.tier?.id).toBe("leather-jacket");
     expect(r.best?.vramGb).toBe(24);
-    expect(r.text).toContain("TIER   LEATHER JACKET");
+    expect(r.text).toMatch(/YOUR RANK\s+LEATHER JACKET/);
     expect(r.text).toContain(tierFor(24).line);
   });
   it("header shows the date and nothing that would become false after a join", () => {
@@ -229,7 +230,7 @@ describe("receipt tier line", () => {
   it("no tier without a dedicated VRAM size", () => {
     const r = buildReceipt({ gpus: [{ name: "Apple M2 Pro", vramMb: null, source: "systeminformation", unified: true }], ramGb: 32, date });
     expect(r.tier).toBeNull();
-    expect(r.text).toContain("TIER   none");
+    expect(r.text).toMatch(/YOUR RANK\s+none/);
   });
   it("every tier fits the receipt width", () => {
     for (const t of TIERS) {
@@ -388,13 +389,13 @@ describe("multi-GPU servers", () => {
   });
   it("prints identical cards once with a count and a VRAM total", () => {
     const r = buildReceipt({ gpus: Array.from({ length: 8 }, v100), ramGb: 512, date });
-    expect(r.lines.filter((l) => l.startsWith("GPU")).length).toBe(1);
-    expect(r.text).toMatch(/8x Tesla V100-SXM2\s+8 x 32 GB/);
-    expect(r.text).toMatch(/TOTAL VRAM\s+256 GB/);
+    expect(r.lines.filter((l) => l.startsWith("Graphics card")).length).toBe(1);
+    expect(r.text).toMatch(/Graphics card\s+8x Tesla V100-SXM2/);
+    expect(r.text).toMatch(/256 GB \(8 x 32 GB\)/);
     expect(r.tier?.id).toBe("the-kitchen");
   });
   it("keeps different cards on separate lines", () => {
     const r = buildReceipt({ gpus: [smi("NVIDIA GeForce RTX 3060", 12288), v100()], ramGb: 64, date });
-    expect(r.lines.filter((l) => l.startsWith("GPU")).length).toBe(2);
+    expect(r.lines.filter((l) => l.startsWith("Graphics card")).length).toBe(2);
   });
 });

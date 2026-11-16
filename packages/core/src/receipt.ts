@@ -1,4 +1,4 @@
-import { SKUS, STEAM_VRAM, STEAM_SURVEY_LABEL } from "./generated/data";
+import { SKUS, STEAM_VRAM } from "./generated/data";
 import { matchGpu, sizesFor } from "./match";
 import { genMedianMbPerDollar, steamPlacement } from "./metrics";
 import { tierFor } from "./tiers";
@@ -34,7 +34,6 @@ export interface Receipt {
 }
 
 const money = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
-const fixed1 = (n: number) => n.toFixed(1);
 
 /** Left text, right text, padded to the receipt width. Wraps the right part to its own line if it will not fit. */
 function row(left: string, right = ""): string[] {
@@ -58,31 +57,35 @@ function wrap(text: string, indent: string): string[] {
   return out;
 }
 
-const IND = "       ";
+const IND = "  ";
+
+/** One sentence on value: memory per launch dollar against the typical card of its generation. */
+function valueLine(mbPerDollar: number, generation: number): string | null {
+  const med = genMedianMbPerDollar(generation, SKUS);
+  if (med == null || med <= 0) return null;
+  const r = mbPerDollar / med;
+  if (r >= 1.15) return `Good value: ${r.toFixed(1)}x the memory per dollar of its series.`;
+  if (r <= 0.87) return `Pricey: ${Math.round((1 - r) * 100)}% less memory per dollar than its series.`;
+  return "Fair value: about average memory per dollar.";
+}
 
 function gpuBlock(gpu: GpuInput, m: MatchResult, paidUsd: number | null | undefined, first: boolean, count = 1): string[] {
   const out: string[] = [];
-  const size = gpu.unified ? "unified memory" : m.vramGb != null ? `${count > 1 ? `${count} x ` : ""}${m.vramGb} GB` : "size unknown";
-  out.push(...row(`GPU    ${count > 1 ? `${count}x ` : ""}${m.displayName}`, size));
+  out.push(...row("Graphics card", `${count > 1 ? `${count}x ` : ""}${m.displayName}`));
+  const mem = gpu.unified ? "shared with RAM"
+    : m.vramGb != null ? (count > 1 ? `${m.vramGb * count} GB (${count} x ${m.vramGb} GB)` : `${m.vramGb} GB`)
+    : "unknown";
+  out.push(...row(`${IND}Video memory (VRAM)`, mem));
 
-  if (m.kind === "desktop-sku" && m.sku && m.sku.msrpUsd != null && m.sku.mbPerDollar != null) {
-    const s = m.sku;
-    const med = genMedianMbPerDollar(s.generation, SKUS);
-    out.push(...row(`${IND}launch price ${money(s.msrpUsd!)}`, `${fixed1(s.mbPerDollar!)} MB/$${med != null ? `, gen median ${fixed1(med)}` : ""}`));
-  } else if (gpu.unified) {
-    out.push(`${IND}shared with system RAM, counted once below`);
-  } else if (m.kind === "known-model-other-vram") {
+  if (m.kind === "desktop-sku" && m.sku && m.sku.msrpUsd != null) {
+    out.push(...row(`${IND}Price at launch`, money(m.sku.msrpUsd)));
+  } else if (m.kind === "known-model-other-vram" && m.vramGb == null) {
     const sizes = sizesFor(m.displayName, SKUS);
-    out.push(...wrap(
-      m.vramGb == null
-        ? `sold as ${sizes.map((g) => `${g} GB`).join(" / ")}: pass --gpu "${m.displayName} ${sizes[0]}GB"`
-        : `no launch price on file for the ${m.vramGb} GB version`,
-      IND,
-    ));
-  } else {
-    out.push(`${IND}no launch price on file`);
+    out.push(...wrap(`Sold as ${sizes.map((g) => `${g} GB`).join(" / ")}: run with --gpu "${m.displayName} ${sizes[0]}GB"`, IND));
+  } else if (!gpu.unified) {
+    out.push(...row(`${IND}Price at launch`, "not on file"));
   }
-  if (first && paidUsd != null) out.push(...row(`${IND}you paid`, money(paidUsd)));
+  if (first && paidUsd != null) out.push(...row(`${IND}You paid`, money(paidUsd)));
   return out;
 }
 
@@ -102,11 +105,10 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   });
   groups.forEach((g, i) => lines.push(...gpuBlock(g.gpu, g.m, input.paidUsd, i === 0, g.count)));
   const dedicated = matches.filter((m, i) => !input.gpus[i]!.unified && m.vramGb != null);
-  if (dedicated.length > 1) {
-    const total = dedicated.reduce((s, m) => s + m.vramGb!, 0);
-    lines.push(...row("TOTAL VRAM", `${total} GB`));
+  if (groups.length > 1 && dedicated.length > 1) {
+    lines.push(...row("Total video memory", `${dedicated.reduce((s, m) => s + m.vramGb!, 0)} GB`));
   }
-  lines.push(...row("RAM", input.ramGb != null ? `${input.ramGb} GB` : "not detected (pass --ram 32)"));
+  lines.push(...row("System memory (RAM)", input.ramGb != null ? `${input.ramGb} GB` : "not detected (add --ram 32)"));
   lines.push(RULE);
 
   // The tier uses the card with the most VRAM, times how many identical copies of it the
@@ -114,18 +116,21 @@ export function buildReceipt(input: ReceiptInput): Receipt {
   const best = matches.filter((m) => m.vramGb != null).sort((a, b) => b.vramGb! - a.vramGb!)[0] ?? null;
   const bestCount = best ? matches.filter((m) => m.displayName === best.displayName && m.vramGb === best.vramGb).length : 0;
   const tier = best ? tierFor(best.vramGb! * bestCount) : null;
-  if (tier) {
-    lines.push(`TIER   ${tier.name.toUpperCase()}`);
-    lines.push(...wrap(tier.line, IND));
-  } else {
-    lines.push("TIER   none (no dedicated VRAM to rank)");
-  }
   const placement = best ? steamPlacement(best.vramGb!, STEAM_VRAM) : null;
-  if (placement) lines.push(...row(`STEAM  more VRAM than ${Math.round(placement.moreThanPct)}% of Steam PCs`, STEAM_SURVEY_LABEL));
+  if (placement) lines.push(...wrap(`More VRAM than ${Math.round(placement.moreThanPct)}% of gamers on Steam.`, ""));
+  const priced = groups.find((g) => g.m.kind === "desktop-sku" && g.m.sku?.mbPerDollar != null);
+  const value = priced ? valueLine(priced.m.sku!.mbPerDollar!, priced.m.sku!.generation) : null;
+  if (value) lines.push(...wrap(value, ""));
+  if (placement || value) lines.push(RULE);
+  if (tier) {
+    lines.push(...row("YOUR RANK", tier.name.toUpperCase()));
+    lines.push(...wrap(tier.line, ""));
+  } else {
+    lines.push(...row("YOUR RANK", "none (no separate video memory)"));
+  }
   lines.push(RULE);
   // A receipt ends with a thank-you. This one is a goodbye: he stepped down on Nov 12, 2026.
   lines.push(...row("THANK YOU, JENSEN.", "1993 to 2026"));
 
-  const priced = matches.some((m) => m.kind === "desktop-sku" && m.sku?.msrpUsd != null);
-  return { lines, text: lines.join("\n"), matches, priced, best, bestCount, tier };
+  return { lines, text: lines.join("\n"), matches, priced: !!groups.find((g) => g.m.kind === "desktop-sku" && g.m.sku?.msrpUsd != null), best, bestCount, tier };
 }
